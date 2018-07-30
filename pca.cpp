@@ -21,6 +21,7 @@ const int N_ROW_POINTS = 13;
 double K[9] = { 6.5308391993466671e+002, 0.0, 3.1950000000000000e+002, 0.0, 6.5308391993466671e+002, 2.3950000000000000e+002, 0.0, 0.0, 1.0 };
 double D1[5] = { 7.0834633684407095e-002, 6.9140193737175351e-002, 0.0, 0.0, -1.3073460323689292e+000 };
 
+// https://github.com/opencv/opencv/blob/master/modules/core/src/types.cpp
 cv::RotatedRect RotatedRect_pt(const cv::Point2f &_point1, const cv::Point2f &_point2, const cv::Point2f &_point3)
 {
 	cv::Point2f _center = 0.5f * (_point1 + _point3);
