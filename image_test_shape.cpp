@@ -2,7 +2,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <dlib/image_processing/frontal_face_detector.h>
-#include <dlib/image_processing/render_face_detections.h>
+//#include <dlib/image_processing/render_face_detections.h>
 #include <dlib/image_processing.h>
 
 using namespace dlib;
@@ -13,23 +13,24 @@ using namespace std;
 double K[9] = { 6.5308391993466671e+002, 0.0, 3.1950000000000000e+002, 0.0, 6.5308391993466671e+002, 2.3950000000000000e+002, 0.0, 0.0, 1.0 };
 double D[5] = { 7.0834633684407095e-002, 6.9140193737175351e-002, 0.0, 0.0, -1.3073460323689292e+000 };
 
-int main()
+int main(int argc, char* argv[])
 {
-    //open cam
-    cv::VideoCapture cap(0);
-    if (!cap.isOpened())
-        {
-        cerr << "Unable to connect to camera" << endl;
-        return EXIT_FAILURE;
-        }
-    //Load face detection and pose estimation models (dlib).
+
     frontal_face_detector detector = get_frontal_face_detector();
     shape_predictor predictor;
+	std::cerr << __LINE__ << std::endl;
     deserialize("shape_predictor_68_face_landmarks.dat") >> predictor;
 
+	std::cerr << __LINE__ << std::endl;
+
     //fill in cam intrinsics and distortion coefficients
+	/*
     cv::Mat cam_matrix = cv::Mat(3, 3, CV_64FC1, K);
     cv::Mat dist_coeffs = cv::Mat(5, 1, CV_64FC1, D);
+	*/
+	// https://qiita.com/TaroYamada/items/e3f3d0ea4ecc0a832fac
+    cv::Mat cam_matrix;
+    cv::Mat dist_coeffs;
 
     //fill in 3D ref points(world coordinates), model referenced from http://aifi.isr.uc.pt/Downloads/OpenGL/glAnthropometric3DModel.cpp
     std::vector<cv::Point3d> object_pts;
@@ -50,14 +51,14 @@ int main()
 
     //2D ref points(image coordinates), referenced from detected facial feature
     std::vector<cv::Point2d> image_pts;
-    
+
     //result
     cv::Mat rotation_vec;                           //3 x 1
     cv::Mat rotation_mat;                           //3 x 3 R
     cv::Mat translation_vec;                        //3 x 1 T
     cv::Mat pose_mat = cv::Mat(3, 4, CV_64FC1);     //3 x 4 R | T
     cv::Mat euler_angle = cv::Mat(3, 1, CV_64FC1);
-    
+
     //reproject 3D points world coordinate axis to verify result pose
     std::vector<cv::Point3d> reprojectsrc;
     reprojectsrc.push_back(cv::Point3d(10.0, 10.0, 10.0));
@@ -80,18 +81,34 @@ int main()
 
     //text on screen
     ostringstream outtext;
+	std::cerr << __LINE__ << std::endl;
 
     //main loop
-    while (1)
+    do
     {
         // Grab a frame
         cv::Mat temp;
-        cap >> temp;
+        // cap >> temp;
+        if (argc < 2) {
+        	temp = cv::imread("IMG_4899.jpg");
+        }else{
+        	temp = cv::imread(argv[1]);
+        }
         cv_image<bgr_pixel> cimg(temp);
 
-        // Detect faces 
+    	/*
+    	 camera matrix
+    	*/
+    	double focal_length = temp.cols;
+    	cv::Point2d center = cv::Point2d(temp.cols/2,temp.rows/2);
+    	cam_matrix = (cv::Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
+    	dist_coeffs = cv::Mat::zeros(4,1,cv::DataType<double>::type); // 歪なし
+
+    	std::cerr << __LINE__ << std::endl;
+        // Detect faces
         std::vector<rectangle> faces = detector(cimg);
 
+    	std::cerr << __LINE__ << std::endl;
         // Find the pose of each face
         if (faces.size() > 0)
             {
@@ -99,9 +116,11 @@ int main()
             full_object_detection shape = predictor(cimg, faces[0]);
 
             //draw features
+            std::cerr << "points" << std::endl;
             for (unsigned int i = 0; i < 68; ++i)
                 {
                 circle(temp, cv::Point(shape.part(i).x(), shape.part(i).y()), 2, cv::Scalar(0, 0, 255), -1);
+                std::cerr << shape.part(i).x() << "\t" <<  shape.part(i).y() << std::endl;
                 }
 
             //fill in 2D ref points, annotations follow https://ibug.doc.ic.ac.uk/resources/300-W/
@@ -122,7 +141,7 @@ int main()
 
             //calc pose
             cv::solvePnP(object_pts, image_pts, cam_matrix, dist_coeffs, rotation_vec, translation_vec);
-            
+
             //reproject
             cv::projectPoints(reprojectsrc, rotation_vec, translation_vec, cam_matrix, dist_coeffs, reprojectdst);
 
@@ -144,9 +163,9 @@ int main()
             cv::Rodrigues(rotation_vec, rotation_mat);
             cv::hconcat(rotation_mat, translation_vec, pose_mat);
             cv::decomposeProjectionMatrix(pose_mat, out_intrinsics, out_rotation, out_translation, cv::noArray(), cv::noArray(), cv::noArray(), euler_angle);
-            
-            //show angle result           
-            outtext << "X: " << setprecision(3) << euler_angle.at<double>(0);           
+
+            //show angle result
+            outtext << "X: " << setprecision(3) << euler_angle.at<double>(0);
             cv::putText(temp, outtext.str(), cv::Point(50, 40), cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar(0, 0, 0));
             outtext.str("");
             outtext << "Y: " << setprecision(3) << euler_angle.at<double>(1);
@@ -160,12 +179,10 @@ int main()
             }
 
         //press esc to end
-        imshow("demo", temp);
-        if (cv::waitKey(5) == 27)
-            {
-            break;
-            }
-    }
+    	cv::imwrite("result.jpg", temp);
+    }while (false);
+
+
 
     return 0;
 }
