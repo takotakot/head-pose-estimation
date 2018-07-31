@@ -18,6 +18,7 @@ class face_cropper {
     dlib::shape_predictor predictor;
     std::vector<dlib::rectangle> faces;
     std::vector<dlib::full_object_detection> shapes;
+    const int n_landmarks = 68;
 
   public:
     face_cropper()
@@ -41,9 +42,39 @@ class face_cropper {
 	int get_num_faces() {
 		return faces.size();
 	}
-	
+
+    cv::Mat get_points_index(int index[], const int &n_index, dlib::full_object_detection &shape) {
+        cv::Mat point_matrix(cv::Size(2, n_index), CV_64FC1);
+        for (int i = 0; i < n_index; ++i)
+        {
+            point_matrix.at<double>(i, 0) = shape.part(i).x();
+            point_matrix.at<double>(i, 1) = shape.part(i).y();
+        }
+
+        return point_matrix;
+    }
+
+    cv::Mat get_center_points(dlib::full_object_detection &shape)
+    {
+        // center 10
+        int center_points_index[] = {27, 28, 29, 30, 33, 51, 62, 66, 57, 8};
+        const int n_center_points = sizeof(center_points_index) / sizeof(center_points_index[0]);
+
+        return get_points_index(center_points_index, n_center_points, shape);
+    }
+
+    cv::Mat get_eye_points(dlib::full_object_detection &shape)
+    {
+        // eye line 13
+        int eye_points_index[] = {36, 37, 38, 39, 40, 41, 27, 42, 43, 44, 45, 46, 47};
+        const int n_eye_points = sizeof(eye_points_index) / sizeof(eye_points_index[0]);
+
+        return get_points_index(eye_points_index, n_eye_points, shape);
+    }
+
 	void crop_nth(cv::Mat &i_img, int n, cv::Mat &o_img) {
-        o_img = i_img;
+        cv::Mat center_points = get_center_points(shapes[n]);
+        cv::Mat eye_points = get_eye_points(shapes[n]);
     }
 };
 
