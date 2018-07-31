@@ -105,8 +105,8 @@ struct face_metrics
     cv::Mat get_chin(dlib::full_object_detection &shape)
     {
         cv::Mat point_matrix(cv::Size(2, 1), CV_64FC1);
-        point_matrix.at<double>(1, 0) = shape.part(chin_index).x();
-        point_matrix.at<double>(1, 1) = shape.part(chin_index).y();
+        point_matrix.at<double>(0, 0) = shape.part(chin_index).x();
+        point_matrix.at<double>(0, 1) = shape.part(chin_index).y();
 
         return point_matrix;
     }
