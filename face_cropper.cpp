@@ -13,6 +13,8 @@
 // using namespace dlib;
 // using namespace std;
 
+typedef cv::Point2f type_point;
+
 class face_cropper
 {
     dlib::frontal_face_detector detector;
@@ -20,6 +22,10 @@ class face_cropper
     std::vector<dlib::rectangle> faces;
     std::vector<dlib::full_object_detection> shapes;
     const int n_landmarks = 68;
+    const int chin_index = 8;
+    const double L4 = 231.9;
+    const double L16 = 121.1;
+    const double L8 = 160.8;
 
   public:
     face_cropper()
@@ -76,6 +82,20 @@ class face_cropper
         return get_points_index(eye_points_index, n_eye_points, shape);
     }
 
+    cv::Mat get_chin(dlib::full_object_detection &shape)
+    {
+        cv::Mat point_matrix(cv::Size(2, 1), CV_64FC1);
+        point_matrix.at<double>(1, 0) = shape.part(chin_index).x();
+        point_matrix.at<double>(1, 1) = shape.part(chin_index).y();
+
+        return point_matrix;
+    }
+
+    double get_l16(dlib::full_object_detection &shape, cv::Mat &mo2, cv::Mat &c0)
+    {
+        return c0.dot(get_chin(shape) - mo2);
+    }
+
     void crop_nth(cv::Mat &i_img, int n, cv::Mat &o_img)
     {
         cv::Mat center_points = get_center_points(shapes[n]);
@@ -91,6 +111,7 @@ class face_cropper
         cv::reduce(eye_points, ue, 0, CV_REDUCE_AVG);
 
         cv::Mat mo2 = (ue - uc) * c0.t() * c0 + uc;
+        const double l16 = get_l16(shapes[n], mo2, c0);
     }
 };
 
