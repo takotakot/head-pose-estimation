@@ -215,6 +215,15 @@ class face_cropper
     void crop_nth(cv::Mat &i_img, int n, cv::Mat &o_img)
     {
         face_metrics metrics(shapes[n]);
+        std::vector<type_point> crop_rect = metrics.get_crop_rect();
+
+        cv::RotatedRect rect;
+#if HAVE_ROTATEDRECT_3PT
+        rect = RotatedRect(crop_rect[0], crop_rect[1], crop_rect[2]);
+#else
+        rect = RotatedRect_pt(crop_rect[0], crop_rect[1], crop_rect[2]);
+#endif
+        crop_rotatedrect(i_img, rect, o_img);
     }
 };
 
