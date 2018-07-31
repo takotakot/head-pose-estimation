@@ -69,11 +69,15 @@ struct face_metrics
         mo2 = (ue - uc) * c0.t() * c0 + uc;
 
         l16 = c0.dot(get_chin(shape) - mo2);
+        double dx = shape.part(16).x() - shape.part(0).x(), dy = shape.part(16).y() - shape.part(0).y();
+        l11 = std::sqrt(dx * dx + dy * dy);
         l4 = l16 * length_4 / length_16;
         l8 = l16 * length_8 / length_16;
         // heuristic: if l16 is too small compared to l11, set l4mod longer
         // TODO: refine
         l4mod = l4 * 1.2;
+        std::cerr << l16 << std::endl;
+        // std::cerr << l4 << std::endl;
     }
 
     cv::Mat get_points_index(int index[], const int &n_index, dlib::full_object_detection &shape)
