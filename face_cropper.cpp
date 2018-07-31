@@ -210,7 +210,6 @@ class face_cropper
         cv::warpAffine(i_img, rotated, rotation_matrix, i_img.size(), cv::INTER_CUBIC);
         // 回転した画像から矩形領域を切り出す
         cv::getRectSubPix(rotated, rect_size, rect.center, o_img);
-        std::cerr << __LINE__ << std::endl;
     }
 
     void crop_nth(cv::Mat &i_img, int n, cv::Mat &o_img)
