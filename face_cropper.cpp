@@ -49,8 +49,8 @@ struct face_metrics
         cv::Mat point_matrix(cv::Size(2, n_index), CV_64FC1);
         for (int i = 0; i < n_index; ++i)
         {
-            point_matrix.at<double>(i, 0) = shape.part(i).x();
-            point_matrix.at<double>(i, 1) = shape.part(i).y();
+            point_matrix.at<double>(i, 0) = shape.part(index[i]).x();
+            point_matrix.at<double>(i, 1) = shape.part(index[i]).y();
         }
    
         return point_matrix;
