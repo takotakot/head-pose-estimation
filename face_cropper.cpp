@@ -67,7 +67,7 @@ struct face_metrics
         mo2 = (ue - uc) * c0.t() * c0 + uc;
 
         l16 = c0.dot(get_chin(shape) - mo2);
-        l4 = l16 * l4 / L16;
+        l4 = l16 * L4 / L16;
         l4mod = l4 * 1.1;
         l8 = l16 * L8 / L16;
     }
