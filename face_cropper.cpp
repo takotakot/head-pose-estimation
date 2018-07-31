@@ -47,9 +47,9 @@ struct face_metrics
 {
     const int chin_index = 8;
     cv::Mat uc, c0, c1, ue, mo2;
-    const double L4 = 231.9;
-    const double L16 = 121.1;
-    const double L8 = 160.8;
+    const double length_4 = 231.9;
+    const double length_16 = 121.1;
+    const double length_8 = 160.8;
     double l16;
     double l4, l4mod, l8;
 
@@ -67,9 +67,9 @@ struct face_metrics
         mo2 = (ue - uc) * c0.t() * c0 + uc;
 
         l16 = c0.dot(get_chin(shape) - mo2);
-        l4 = l16 * L4 / L16;
+        l4 = l16 * length_4 / length_16;
         l4mod = l4 * 1.1;
-        l8 = l16 * L8 / L16;
+        l8 = l16 * length_8 / length_16;
     }
 
     cv::Mat get_points_index(int index[], const int &n_index, dlib::full_object_detection &shape)
