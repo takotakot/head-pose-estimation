@@ -111,6 +111,12 @@ struct face_metrics
         return point_matrix;
     }
 
+    /*
+        Refactorization is needed:
+        http://tessy.org/wiki/index.php?%B9%D4%CE%F3%A4%CE%BE%E8%BB%BB%A1%A4%C6%E2%C0%D1%A1%A4%B3%B0%C0%D1
+        https://qiita.com/fukushima1981/items/d283b3af3e21d94550c4
+        https://qiita.com/ChaoticActivity/items/68f10d7452680fa1d52d
+    */
     std::vector<type_point> get_face_rect() {
         cv::Mat tmp;
         std::vector<type_point> rect;
