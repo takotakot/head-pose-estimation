@@ -51,7 +51,8 @@ struct face_metrics
     const double length_4 = 231.9;
     const double length_16 = 121.1;
     const double length_8 = 160.8;
-    double l16;
+    const double length_11 = 147.7;
+    double l16, l11;
     double l4, l4mod, l8;
 
     face_metrics(dlib::full_object_detection &shape)
@@ -69,8 +70,10 @@ struct face_metrics
 
         l16 = c0.dot(get_chin(shape) - mo2);
         l4 = l16 * length_4 / length_16;
-        l4mod = l4 * 1.1;
         l8 = l16 * length_8 / length_16;
+        // heuristic: if l16 is too small compared to l11, set l4mod longer
+        // TODO: refine
+        l4mod = l4 * 1.2;
     }
 
     cv::Mat get_points_index(int index[], const int &n_index, dlib::full_object_detection &shape)
