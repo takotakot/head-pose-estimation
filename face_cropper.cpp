@@ -190,6 +190,28 @@ class face_cropper
         return faces.size();
     }
 
+    // https://qiita.com/vs4sh/items/93d65468a992af5b8f92
+    void crop_rotatedrect(cv::Mat &i_img, cv::RotatedRect &rect, cv::Mat &o_img){
+        cv::Mat rotation_matrix, rotated;
+
+        float angle = rect.angle;
+        cv::Size rect_size = rect.size;
+        if (rect.angle < -45.)
+        {
+            angle += 90.0;
+            std::swap(rect_size.width, rect_size.height);
+        }
+        std::cerr << angle << std::endl;
+
+        // 回転矩形の角度から回転行列を計算
+        rotation_matrix = cv::getRotationMatrix2D(rect.center, angle, 1.0);
+        // 元画像を回転
+        cv::warpAffine(i_img, rotated, rotation_matrix, i_img.size(), cv::INTER_CUBIC);
+        // 回転した画像から矩形領域を切り出す
+        cv::getRectSubPix(rotated, rect_size, rect.center, o_img);
+        std::cerr << __LINE__ << std::endl;
+    }
+
     void crop_nth(cv::Mat &i_img, int n, cv::Mat &o_img)
     {
         face_metrics metrics(shapes[n]);
