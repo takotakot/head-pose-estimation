@@ -101,6 +101,26 @@ struct face_metrics
 
         return rect;
     }
+
+    std::vector<type_point> get_crop_rect() {
+        const double m1 = 40, m2 = 30, m3 = 3.5, m4 = 30;
+        cv::Mat tmp;
+        std::vector<type_point> rect;
+        
+        tmp = mo2 - (l4mod + l4mod * m3 / m4 - l16) * c0 - (l4mod * m2 / m4 / 2) * c1;
+        rect.push_back(type_point(tmp));
+
+        tmp += (l4mod * m1 / m4) * c0;
+        rect.push_back(type_point(tmp));
+
+        tmp += (l4mod * m2 / m4) * c1;
+        rect.push_back(type_point(tmp));
+
+        tmp += -(l4mod * m1 / m4) * c0;
+        rect.push_back(type_point(tmp));
+
+        return rect;
+    }
 };
 
 class face_cropper
