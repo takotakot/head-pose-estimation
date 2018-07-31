@@ -47,6 +47,7 @@ struct face_metrics
 {
     const int chin_index = 8;
     cv::Mat uc, c0, c1, ue, mo2;
+    // From AIST人体寸法データベース
     const double length_4 = 231.9;
     const double length_16 = 121.1;
     const double length_8 = 160.8;
