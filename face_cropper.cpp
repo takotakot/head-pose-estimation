@@ -15,41 +15,33 @@
 
 typedef cv::Point2f type_point;
 
-class face_cropper
+struct face_metrics
 {
-    dlib::frontal_face_detector detector;
-    dlib::shape_predictor predictor;
-    std::vector<dlib::rectangle> faces;
-    std::vector<dlib::full_object_detection> shapes;
-    const int n_landmarks = 68;
     const int chin_index = 8;
+    cv::Mat uc, c0, c1, ue, mo2;
     const double L4 = 231.9;
     const double L16 = 121.1;
     const double L8 = 160.8;
+    double l16;
+    double l4, l4mod, l8;
 
-  public:
-    face_cropper()
+    face_metrics(dlib::full_object_detection &shape)
     {
-        detector = dlib::get_frontal_face_detector();
-        dlib::deserialize("shape_predictor_68_face_landmarks.dat") >> predictor;
-    }
+        cv::Mat center_points = get_center_points(shape);
+        cv::Mat eye_points = get_eye_points(shape);
 
-    template <typename T>
-    void detect(dlib::cv_image<T> &image)
-    {
-        faces.clear();
-        faces = detector(image);
+        cv::reduce(center_points, uc, 0, CV_REDUCE_AVG);
+        cv::PCA pca_center_points(center_points, cv::Mat(), CV_PCA_DATA_AS_ROW, 2);
+        c0 = pca_center_points.eigenvectors.row(0);
+        c1 = pca_center_points.eigenvectors.row(1);
+        cv::reduce(eye_points, ue, 0, CV_REDUCE_AVG);
 
-        shapes.clear();
-        for (std::vector<dlib::rectangle>::iterator it = faces.begin(); it != faces.end(); ++it)
-        {
-            shapes.push_back(predictor(image, *it));
-        }
-    }
+        mo2 = (ue - uc) * c0.t() * c0 + uc;
 
-    int get_num_faces()
-    {
-        return faces.size();
+        l16 = c0.dot(get_chin(shape) - mo2);
+        l4 = l16 * l4 / L16;
+        l4mod = l4 * 1.1;
+        l8 = l16 * L8 / L16;
     }
 
     cv::Mat get_points_index(int index[], const int &n_index, dlib::full_object_detection &shape)
@@ -60,7 +52,7 @@ class face_cropper
             point_matrix.at<double>(i, 0) = shape.part(i).x();
             point_matrix.at<double>(i, 1) = shape.part(i).y();
         }
-
+   
         return point_matrix;
     }
 
@@ -91,27 +83,62 @@ class face_cropper
         return point_matrix;
     }
 
-    double get_l16(dlib::full_object_detection &shape, cv::Mat &mo2, cv::Mat &c0)
+    std::vector<type_point> get_face_rect() {
+        cv::Mat tmp;
+        std::vector<type_point> rect;
+        
+        tmp = mo2 - (l4mod - l16) * c0 - (l8/2) * c1;
+        rect.push_back(type_point(tmp));
+
+        tmp += l4mod * c0;
+        rect.push_back(type_point(tmp));
+
+        tmp += l8 * c1;
+        rect.push_back(type_point(tmp));
+
+        tmp += -l4mod * c1;
+        rect.push_back(type_point(tmp));
+
+        return rect;
+    }
+};
+
+class face_cropper
+{
+    dlib::frontal_face_detector detector;
+    dlib::shape_predictor predictor;
+    std::vector<dlib::rectangle> faces;
+    std::vector<dlib::full_object_detection> shapes;
+    const int n_landmarks = 68;
+
+  public:
+    face_cropper()
     {
-        return c0.dot(get_chin(shape) - mo2);
+        detector = dlib::get_frontal_face_detector();
+        dlib::deserialize("shape_predictor_68_face_landmarks.dat") >> predictor;
+    }
+
+    template <typename T>
+    void detect(dlib::cv_image<T> &image)
+    {
+        faces.clear();
+        faces = detector(image);
+
+        shapes.clear();
+        for (std::vector<dlib::rectangle>::iterator it = faces.begin(); it != faces.end(); ++it)
+        {
+            shapes.push_back(predictor(image, *it));
+        }
+    }
+
+    int get_num_faces()
+    {
+        return faces.size();
     }
 
     void crop_nth(cv::Mat &i_img, int n, cv::Mat &o_img)
     {
-        cv::Mat center_points = get_center_points(shapes[n]);
-        cv::Mat eye_points = get_eye_points(shapes[n]);
-
-        cv::Mat uc;
-        cv::reduce(center_points, uc, 0, CV_REDUCE_AVG);
-        cv::PCA pca_center_points(center_points, cv::Mat(), CV_PCA_DATA_AS_ROW, 2);
-        cv::Mat c0 = pca_center_points.eigenvectors.row(0);
-        cv::Mat c1 = pca_center_points.eigenvectors.row(1);
-
-        cv::Mat ue;
-        cv::reduce(eye_points, ue, 0, CV_REDUCE_AVG);
-
-        cv::Mat mo2 = (ue - uc) * c0.t() * c0 + uc;
-        const double l16 = get_l16(shapes[n], mo2, c0);
+        face_metrics metrics(shapes[n]);
     }
 };
 
