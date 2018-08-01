@@ -38,6 +38,7 @@ struct face_metrics
     cv::Mat get_chin(dlib::full_object_detection &shape);
     std::vector<type_point> get_face_rect();
     std::vector<type_point> get_crop_rect();
+    void dump_metric(std::ostream &os);
 };
 
 class face_cropper
@@ -46,6 +47,7 @@ class face_cropper
     dlib::shape_predictor predictor;
     std::vector<dlib::rectangle> faces;
     std::vector<dlib::full_object_detection> shapes;
+    std::vector<face_metrics> metrics;
     const int n_landmarks = 68;
 
   public:
@@ -55,6 +57,7 @@ class face_cropper
     int get_num_faces();
     void crop_rotatedrect(cv::Mat &i_img, cv::RotatedRect &rect, cv::Mat &o_img);
     void crop_nth(cv::Mat &i_img, int n, cv::Mat &o_img);
+    void dump_metric(int n, std::ostream &os);
 };
 
 #endif // FACE_CROPPER_HPP

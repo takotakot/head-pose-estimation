@@ -136,6 +136,11 @@ std::vector<type_point> face_metrics::get_crop_rect()
     return rect;
 }
 
+void face_metrics::dump_metric(std::ostream &os)
+{
+    os << l16 << "\t" << l11 << "\t" << l11 / l16;
+}
+
 face_cropper::face_cropper()
 {
     detector = dlib::get_frontal_face_detector();
@@ -149,9 +154,11 @@ void face_cropper::detect(dlib::cv_image<T> &image)
     faces = detector(image);
 
     shapes.clear();
+    metrics.clear();
     for (std::vector<dlib::rectangle>::iterator it = faces.begin(); it != faces.end(); ++it)
     {
         shapes.push_back(predictor(image, *it));
+        metrics.push_back(shapes.back());
     }
 }
 template void face_cropper::detect<dlib::bgr_pixel>(dlib::cv_image<dlib::bgr_pixel>&);
@@ -185,8 +192,7 @@ void face_cropper::crop_rotatedrect(cv::Mat &i_img, cv::RotatedRect &rect, cv::M
 
 void face_cropper::crop_nth(cv::Mat &i_img, int n, cv::Mat &o_img)
 {
-    face_metrics metrics(shapes[n]);
-    std::vector<type_point> crop_rect = metrics.get_crop_rect();
+    std::vector<type_point> crop_rect = metrics[n].get_crop_rect();
 
     cv::RotatedRect rect;
 #if HAVE_ROTATEDRECT_3PT
@@ -195,4 +201,9 @@ void face_cropper::crop_nth(cv::Mat &i_img, int n, cv::Mat &o_img)
     rect = RotatedRect_pt(crop_rect[0], crop_rect[1], crop_rect[2]);
 #endif
     crop_rotatedrect(i_img, rect, o_img);
+}
+
+void face_cropper::dump_metric(int n, std::ostream &os)
+{
+    metrics[n].dump_metric(os);
 }
