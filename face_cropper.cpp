@@ -295,14 +295,14 @@ void face_cropper::crop_rotatedrect(cv::Mat &i_img, cv::RotatedRect &rect, cv::M
 {
     cv::Mat rotation_matrix, rotated;
 
-    float angle = rect.angle;
+    angle = rect.angle;
     cv::Size rect_size = rect.size;
     if (rect.angle < -45.)
     {
         angle += 90.0;
         std::swap(rect_size.width, rect_size.height);
     }
-    std::cerr << angle << std::endl;
+    // std::cerr << angle << std::endl;
 
     // 回転矩形の角度から回転行列を計算
     rotation_matrix = cv::getRotationMatrix2D(rect.center, angle, 1.0);
@@ -328,4 +328,18 @@ void face_cropper::crop_nth(cv::Mat &i_img, int n, cv::Mat &o_img)
 void face_cropper::dump_metric(int n, std::ostream &os)
 {
     metrics[n].dump_metric(os);
+
+    std::vector<type_point> crop_rect = metrics[n].get_crop_rect();
+    cv::RotatedRect rect;
+#if HAVE_ROTATEDRECT_3PT
+    rect = RotatedRect(crop_rect[0], crop_rect[1], crop_rect[2]);
+#else
+    rect = RotatedRect_pt(crop_rect[0], crop_rect[1], crop_rect[2]);
+#endif
+    angle = rect.angle;
+    if (angle < -45.)
+    {
+        angle += 90.0;
+    }
+    os << "\t" << angle;
 }

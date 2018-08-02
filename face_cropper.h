@@ -120,6 +120,7 @@ class face_cropper
     std::vector<dlib::full_object_detection> shapes;
     std::vector<face_metrics> metrics;
     const int n_landmarks = 68;
+    double angle;
 
   public:
     face_cropper();
