@@ -249,7 +249,7 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
         rotation(1, 0), rotation(1, 1), rotation(1, 2), 0,
         rotation(2, 0), rotation(2, 1), rotation(2, 2), 0};
 
-    cv::Matx13d eulerAngles;
+    cv::Vec3d eulerAngles;
 
     decomposeProjectionMatrix(projection_matrix, projection, rotation, translation_vector,
                               cv::noArray(), cv::noArray(), cv::noArray(), eulerAngles);
