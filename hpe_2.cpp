@@ -140,6 +140,24 @@ int main(int argc, char **argv)
 
     cout << nose_end_point2D << endl;
 
+    cv::Matx33d rotation;
+    cv::Rodrigues(rotation_vector, rotation);
+    cv::Matx34d projection_matrix = {
+        rotation(0, 0), rotation(0, 1), rotation(0, 2), 0,
+        rotation(1, 0), rotation(1, 1), rotation(1, 2), 0,
+        rotation(2, 0), rotation(2, 1), rotation(2, 2), 0};
+
+    cv::Vec3d eulerAngles;
+    std::cerr << __LINE__ << std::endl;
+    decomposeProjectionMatrix(projection_matrix, camera_matrix, rotation, translation_vector,
+                              cv::noArray(), cv::noArray(), cv::noArray(), eulerAngles);
+    double yaw, pitch, roll;
+    yaw = eulerAngles[1];
+    pitch = eulerAngles[0];
+    roll = eulerAngles[2];
+
+    cout << "roll, pitch, yaw\t" << roll << "\t" << pitch << "\t" << yaw << endl;
+
     // Display image.
     // cv::imshow("Output", im);
     cv::imwrite("hpe_result.jpg", im);
