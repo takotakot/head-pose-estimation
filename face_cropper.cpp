@@ -162,7 +162,7 @@ void face_metrics::add_debug_image(cv::Mat &image)
 head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
 {
     cv::Mat projectionMat = cv::Mat::zeros(3, 3, CV_32F);
-    cv::Matx33f projection = projectionMat;
+    cv::Matx33d projection = projectionMat;
 
     projection(0, 0) = focal_length;
     projection(1, 1) = focal_length;
