@@ -48,6 +48,8 @@ face_metrics::face_metrics(dlib::full_object_detection &shape)
     l4mod = l4 * 1.2;
     std::cerr << l16 << std::endl;
     // std::cerr << l4 << std::endl;
+
+    pose = face_metrics::calc_pose(shape);
 }
 
 cv::Mat face_metrics::get_points_index(int index[], const int &n_index, dlib::full_object_detection &shape)
@@ -144,6 +146,10 @@ std::vector<type_point> face_metrics::get_crop_rect()
 void face_metrics::dump_metric(std::ostream &os)
 {
     os << l16 << "\t" << l11 << "\t" << l11 / l16;
+}
+
+head_pose face_metrics::calc_pose(dlib::full_object_detection &shape) {
+    return head_pose();
 }
 
 face_cropper::face_cropper()
