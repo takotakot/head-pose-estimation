@@ -150,7 +150,8 @@ std::vector<type_point> face_metrics::get_crop_rect()
 
 void face_metrics::dump_metric(std::ostream &os)
 {
-    os << l16 << "\t" << l11 << "\t" << l11 / l16;
+    os << l16 << "\t" << l11 << "\t" << l11 / l16 << "\t";
+    os << roll << "\t" << pitch << "\t" << yaw;
 }
 
 void face_metrics::add_debug_image(cv::Mat &image)
