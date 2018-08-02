@@ -91,7 +91,7 @@ cv::Mat face_metrics::get_chin(dlib::full_object_detection &shape)
 
 std::vector<double> calc_euler(dlib::full_object_detection &shape)
 {
-    return std::vector<type_point>();
+    return std::vector<double>();
 }
 
 /*
