@@ -30,12 +30,14 @@ struct face_metrics
     const double length_11 = 147.7;
     double l16, l11;
     double l4, l4mod, l8;
+    double roll, pitch, yaw;
 
     face_metrics(dlib::full_object_detection &shape);
     cv::Mat get_points_index(int index[], const int &n_index, dlib::full_object_detection &shape);
     cv::Mat get_center_points(dlib::full_object_detection &shape);
     cv::Mat get_eye_points(dlib::full_object_detection &shape);
     cv::Mat get_chin(dlib::full_object_detection &shape);
+    std::vector<double> calc_euler(dlib::full_object_detection &shape);
     std::vector<type_point> get_face_rect();
     std::vector<type_point> get_crop_rect();
     void dump_metric(std::ostream &os);

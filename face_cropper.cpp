@@ -89,6 +89,11 @@ cv::Mat face_metrics::get_chin(dlib::full_object_detection &shape)
     return point_matrix;
 }
 
+std::vector<double> calc_euler(dlib::full_object_detection &shape)
+{
+    return std::vector<type_point>();
+}
+
 /*
         Refactorization is needed:
         http://tessy.org/wiki/index.php?%B9%D4%CE%F3%A4%CE%BE%E8%BB%BB%A1%A4%C6%E2%C0%D1%A1%A4%B3%B0%C0%D1
