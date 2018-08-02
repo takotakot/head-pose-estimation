@@ -179,7 +179,7 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
     head_points.push_back(P3D_LEFT_EAR);
     head_points.push_back(P3D_MENTON);
     head_points.push_back(P3D_NOSE);
-    head_points.push_back(P3D_SUBNASALE);
+//    head_points.push_back(P3D_SUBNASALE);
     head_points.push_back(P3D_STOMMION);
 
     std::vector<cv::Point2f> detected_points;

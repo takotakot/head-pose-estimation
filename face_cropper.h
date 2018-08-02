@@ -28,7 +28,7 @@ typedef cv::Matx44d head_pose;
 // Values taken from https://en.wikipedia.org/wiki/Human_head
 // X points forward
 // Original
-/*
+
 const static cv::Point3f P3D_SELLION(0., 0., 0.);
 const static cv::Point3f P3D_RIGHT_EYE(-20., -65.5, -5.);
 const static cv::Point3f P3D_LEFT_EYE(-20., 65.5, -5.);
@@ -37,8 +37,9 @@ const static cv::Point3f P3D_LEFT_EAR(-100., 77.5, -6.);
 const static cv::Point3f P3D_NOSE(21.0, 0., -48.0);
 const static cv::Point3f P3D_STOMMION(10.0, 0., -75.0);
 const static cv::Point3f P3D_MENTON(0., 0., -133.0);
-*/
+
 // In mm scale
+/*
 const static cv::Point3f P3D_SELLION(0., 0., 0.);
 const static cv::Point3f P3D_RIGHT_EYE(-20., -45.55, -5.);
 const static cv::Point3f P3D_LEFT_EYE(-20., 45.55, -5.);
@@ -48,6 +49,7 @@ const static cv::Point3f P3D_NOSE(21.0, 0., -48.0);
 const static cv::Point3f P3D_SUBNASALE(0., 0., -48.0);
 const static cv::Point3f P3D_STOMMION(10.0, 0., -75.0);
 const static cv::Point3f P3D_MENTON(-32.14, 0., -116.76);
+*/
 
 const static double THETA_0 = M_2_PI - std::acos((121.1 * 121.1 + 53.0 * 53.0 - 71.4 * 71.4) / (2 * 121.1 * 53.0));
 
