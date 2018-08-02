@@ -241,19 +241,17 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
     cv::line(_debug, projected_axes[0], projected_axes[1], cv::Scalar(0, 0, 255), 2, CV_AA);
 
     // putText(_debug, "(" + to_string(int(pose(0, 3) * 100)) + "cm, " + to_string(int(pose(1, 3) * 100)) + "cm, " + to_string(int(pose(2, 3) * 100)) + "cm)", coordsOf(shape, SELLION), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
+#endif
 
     cv::Matx34d projection_matrix = {
         rotation(0, 0), rotation(0, 1), rotation(0, 2), 0,
         rotation(1, 0), rotation(1, 1), rotation(1, 2), 0,
-        rotation(2, 0), rotation(2, 1), rotation(2, 2), 0,
-    };
+        rotation(2, 0), rotation(2, 1), rotation(2, 2), 0};
 
     cv::Matx13d eulerAngles;
 
     decomposeProjectionMatrix(projection_matrix, projection, rotation, translation_vector,
                               cv::noArray(), cv::noArray(), cv::noArray(), eulerAngles);
-#endif
-
     return pose;
 }
 
