@@ -196,12 +196,12 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
     auto stomion = (coordsOf(shape, MOUTH_CENTER_TOP) + coordsOf(shape, MOUTH_CENTER_BOTTOM)) * 0.5;
     detected_points.push_back(stomion);
 
-    cv::Mat rotation_vetor, translation_vector;
+    cv::Mat rotation_vector, translation_vector;
 
     // Find the 3D pose of our head
     cv::solvePnP(head_points, detected_points,
              projection, cv::noArray(),
-             rotation_vetor, translation_vector, false,
+             rotation_vector, translation_vector, false,
 #ifdef OPENCV3
              cv::SOLVEPNP_ITERATIVE);
 #else
@@ -209,7 +209,7 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
 #endif
 
     cv::Matx33d rotation;
-    cv::Rodrigues(rotation_vetor, rotation);
+    cv::Rodrigues(rotation_vector, rotation);
 
     head_pose pose = {
         rotation(0, 0), rotation(0, 1), rotation(0, 2), translation_vector.at<double>(0) / 1000,
@@ -221,7 +221,7 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
 
     std::vector<cv::Point2f> reprojected_points;
 
-    cv::projectPoints(head_points, rotation_vetor, translation_vector, projection, cv::noArray(), reprojected_points);
+    cv::projectPoints(head_points, rotation_vector, translation_vector, projection, cv::noArray(), reprojected_points);
 
     for (auto point : reprojected_points)
     {
