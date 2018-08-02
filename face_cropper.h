@@ -47,7 +47,7 @@ const static cv::Point3f P3D_RIGHT_EAR(-100., -74.25, -6.);
 const static cv::Point3f P3D_LEFT_EAR(-100., 74.25, -6.);
 const static cv::Point3f P3D_NOSE(21.0, 0., -48.0);
 const static cv::Point3f P3D_SUBNASALE(0., 0., -48.0);
-const static cv::Point3f P3D_STOMMION(10.0, 0., -75.0);
+const static cv::Point3f P3D_STOMION(10.0, 0., -75.0);
 const static cv::Point3f P3D_MENTON(-32.14, 0., -116.76);
 */
 
