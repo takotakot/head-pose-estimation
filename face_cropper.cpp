@@ -52,6 +52,11 @@ face_metrics::face_metrics(double focal_length, cv::Point2d center, dlib::full_o
     pose = face_metrics::calc_pose(shape);
 }
 
+cv::Point2f face_metrics::coordsOf(dlib::full_object_detection &shape, FACIAL_FEATURE feature)
+{
+    return toCv(shape.part(feature));
+}
+
 cv::Mat face_metrics::get_points_index(int index[], const int &n_index, dlib::full_object_detection &shape)
 {
     cv::Mat point_matrix(cv::Size(2, n_index), CV_64FC1);
@@ -148,8 +153,98 @@ void face_metrics::dump_metric(std::ostream &os)
     os << l16 << "\t" << l11 << "\t" << l11 / l16;
 }
 
-head_pose face_metrics::calc_pose(dlib::full_object_detection &shape) {
-    return head_pose();
+void face_metrics::add_debug_image(cv::Mat &image)
+{
+    _debug = image.clone();
+}
+
+head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
+{
+    cv::Mat projectionMat = cv::Mat::zeros(3, 3, CV_32F);
+    cv::Matx33f projection = projectionMat;
+
+    projection(0, 0) = focal_length;
+    projection(1, 1) = focal_length;
+    projection(0, 2) = center.x;
+    projection(1, 2) = center.y;
+    projection(2, 2) = 1;
+
+    std::vector<cv::Point3f> head_points;
+
+    head_points.push_back(P3D_SELLION);
+    head_points.push_back(P3D_RIGHT_EYE);
+    head_points.push_back(P3D_LEFT_EYE);
+    head_points.push_back(P3D_RIGHT_EAR);
+    head_points.push_back(P3D_LEFT_EAR);
+    head_points.push_back(P3D_MENTON);
+    head_points.push_back(P3D_NOSE);
+    head_points.push_back(P3D_SUBNASALE);
+    head_points.push_back(P3D_STOMMION);
+
+    std::vector<cv::Point2f> detected_points;
+
+    detected_points.push_back(coordsOf(shape, SELLION));
+    detected_points.push_back(coordsOf(shape, RIGHT_EYE));
+    detected_points.push_back(coordsOf(shape, LEFT_EYE));
+    detected_points.push_back(coordsOf(shape, RIGHT_SIDE));
+    detected_points.push_back(coordsOf(shape, LEFT_SIDE));
+    detected_points.push_back(coordsOf(shape, MENTON));
+    detected_points.push_back(coordsOf(shape, NOSE));
+    detected_points.push_back(coordsOf(shape, SUBNASALE));
+
+    auto stomion = (coordsOf(shape, MOUTH_CENTER_TOP) + coordsOf(shape, MOUTH_CENTER_BOTTOM)) * 0.5;
+    detected_points.push_back(stomion);
+
+    cv::Mat rotation_vetor, translation_vector;
+
+    // Find the 3D pose of our head
+    cv::solvePnP(head_points, detected_points,
+             projection, cv::noArray(),
+             rotation_vetor, translation_vector, false,
+#ifdef OPENCV3
+             cv::SOLVEPNP_ITERATIVE);
+#else
+             cv::ITERATIVE);
+#endif
+
+    cv::Matx33d rotation;
+    cv::Rodrigues(rotation_vetor, rotation);
+
+    head_pose pose = {
+        rotation(0, 0), rotation(0, 1), rotation(0, 2), translation_vector.at<double>(0) / 1000,
+        rotation(1, 0), rotation(1, 1), rotation(1, 2), translation_vector.at<double>(1) / 1000,
+        rotation(2, 0), rotation(2, 1), rotation(2, 2), translation_vector.at<double>(2) / 1000,
+        0, 0, 0, 1};
+
+#ifdef HEAD_POSE_ESTIMATION_DEBUG
+
+    std::vector<cv::Point2f> reprojected_points;
+
+    cv::projectPoints(head_points, rotation_vetor, translation_vector, projection, cv::noArray(), reprojected_points);
+
+    for (auto point : reprojected_points)
+    {
+        cv::circle(_debug, point, 2, cv::Scalar(0, 255, 255), 2);
+    }
+
+    std::vector<cv::Point3f> axes;
+    axes.push_back(cv::Point3f(0, 0, 0));
+    axes.push_back(cv::Point3f(50, 0, 0));
+    axes.push_back(cv::Point3f(0, 50, 0));
+    axes.push_back(cv::Point3f(0, 0, 50));
+    std::vector<cv::Point2f> projected_axes;
+
+    cv::projectPoints(axes, rotation_vetor, translation_vector, projection, cv::noArray(), projected_axes);
+
+    cv::line(_debug, projected_axes[0], projected_axes[3], cv::Scalar(255, 0, 0), 2, CV_AA);
+    cv::line(_debug, projected_axes[0], projected_axes[2], cv::Scalar(0, 255, 0), 2, CV_AA);
+    cv::line(_debug, projected_axes[0], projected_axes[1], cv::Scalar(0, 0, 255), 2, CV_AA);
+
+    // putText(_debug, "(" + to_string(int(pose(0, 3) * 100)) + "cm, " + to_string(int(pose(1, 3) * 100)) + "cm, " + to_string(int(pose(2, 3) * 100)) + "cm)", coordsOf(shape, SELLION), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
+
+#endif
+
+    return pose;
 }
 
 face_cropper::face_cropper()

@@ -1,6 +1,8 @@
 #ifndef FACE_CROPPER_H_
 #define FACE_CROPPER_H_
 
+#define HEAD_POSE_ESTIMATION_DEBUG 1
+
 #include <vector>
 #include <cmath>
 #ifdef DEBUG
@@ -11,6 +13,7 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 
 #include <dlib/opencv.h>
 #include <dlib/image_processing/frontal_face_detector.h>
@@ -87,8 +90,12 @@ struct face_metrics
     double roll, pitch, yaw;
     double focal_length;
     cv::Point2d center;
+#ifdef HEAD_POSE_ESTIMATION_DEBUG
+    mutable cv::Mat _debug;
+#endif
 
     face_metrics(double focal_length, cv::Point2d center, dlib::full_object_detection &shape);
+    cv::Point2f coordsOf(dlib::full_object_detection &shape, FACIAL_FEATURE feature);
     cv::Mat get_points_index(int index[], const int &n_index, dlib::full_object_detection &shape);
     cv::Mat get_center_points(dlib::full_object_detection &shape);
     cv::Mat get_eye_points(dlib::full_object_detection &shape);
@@ -97,6 +104,9 @@ struct face_metrics
     std::vector<type_point> get_face_rect();
     std::vector<type_point> get_crop_rect();
     void dump_metric(std::ostream &os);
+#ifdef HEAD_POSE_ESTIMATION_DEBUG
+    void add_debug_image(cv::Mat &image);
+#endif
 
   private:
     head_pose calc_pose(dlib::full_object_detection &shape);
@@ -120,5 +130,10 @@ class face_cropper
     void crop_nth(cv::Mat &i_img, int n, cv::Mat &o_img);
     void dump_metric(int n, std::ostream &os);
 };
+
+inline cv::Point2f toCv(const dlib::point &p)
+{
+    return cv::Point2f(p.x(), p.y());
+}
 
 #endif // FACE_CROPPER_HPP
