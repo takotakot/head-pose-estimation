@@ -2,6 +2,7 @@
 #define FACE_CROPPER_H_
 
 #include <vector>
+#include <cmath>
 #ifdef DEBUG
 #include <cstdio>
 #include <sstream>
@@ -16,6 +17,57 @@
 #include <dlib/image_processing.h>
 
 typedef cv::Point2f type_point;
+typedef cv::Matx44d head_pose;
+
+// From: https://github.com/chili-epfl/attention-tracker/
+// Anthropometric for male adult
+// Relative position of various facial feature relative to sellion
+// Values taken from https://en.wikipedia.org/wiki/Human_head
+// X points forward
+// Original
+/*
+const static cv::Point3f P3D_SELLION(0., 0., 0.);
+const static cv::Point3f P3D_RIGHT_EYE(-20., -65.5, -5.);
+const static cv::Point3f P3D_LEFT_EYE(-20., 65.5, -5.);
+const static cv::Point3f P3D_RIGHT_EAR(-100., -77.5, -6.);
+const static cv::Point3f P3D_LEFT_EAR(-100., 77.5, -6.);
+const static cv::Point3f P3D_NOSE(21.0, 0., -48.0);
+const static cv::Point3f P3D_STOMMION(10.0, 0., -75.0);
+const static cv::Point3f P3D_MENTON(0., 0., -133.0);
+*/
+// In mm scale
+const static cv::Point3f P3D_SELLION(0., 0., 0.);
+const static cv::Point3f P3D_RIGHT_EYE(-20., -45.55, -5.);
+const static cv::Point3f P3D_LEFT_EYE(-20., 45.55, -5.);
+const static cv::Point3f P3D_RIGHT_EAR(-100., -74.25, -6.);
+const static cv::Point3f P3D_LEFT_EAR(-100., 74.25, -6.);
+const static cv::Point3f P3D_NOSE(21.0, 0., -48.0);
+const static cv::Point3f P3D_SUBNASALE(0., 0., -48.0);
+const static cv::Point3f P3D_STOMMION(10.0, 0., -75.0);
+const static cv::Point3f P3D_MENTON(-32.14, 0., -116.76);
+
+const static double THETA_0 = M_2_PI - std::acos((121.1 * 121.1 + 53.0 * 53.0 - 71.4 * 71.4) / (2 * 121.1 * 53.0));
+
+// Interesting facial features with their landmark index
+enum FACIAL_FEATURE
+{
+    NOSE = 30,
+    SUBNASALE = 33,
+    RIGHT_EYE = 36,
+    LEFT_EYE = 45,
+    RIGHT_SIDE = 0,
+    LEFT_SIDE = 16,
+    EYEBROW_RIGHT = 21,
+    EYEBROW_LEFT = 22,
+    MOUTH_UP = 51,
+    MOUTH_DOWN = 57,
+    MOUTH_RIGHT = 48,
+    MOUTH_LEFT = 54,
+    SELLION = 27,
+    MOUTH_CENTER_TOP = 62,
+    MOUTH_CENTER_BOTTOM = 66,
+    MENTON = 8
+};
 
 cv::RotatedRect RotatedRect_pt(const cv::Point2f &_point1, const cv::Point2f &_point2, const cv::Point2f &_point3);
 
@@ -26,6 +78,7 @@ struct face_metrics
     // From AIST人体寸法データベース
     const double length_4 = 231.9;
     const double length_16 = 121.1;
+    const double length_16_z = 116.76;
     const double length_8 = 160.8;
     const double length_11 = 147.7;
     double l16, l11;
