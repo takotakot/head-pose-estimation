@@ -172,7 +172,7 @@ void face_cropper::detect(dlib::cv_image<T> &image)
     for (std::vector<dlib::rectangle>::iterator it = faces.begin(); it != faces.end(); ++it)
     {
         shapes.push_back(predictor(image, *it));
-        metrics.push_back(focal_length, center, shapes.back());
+        metrics.push_back(shapes.back());
     }
 }
 template void face_cropper::detect<dlib::bgr_pixel>(dlib::cv_image<dlib::bgr_pixel>&);
