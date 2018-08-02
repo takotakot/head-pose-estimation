@@ -25,7 +25,7 @@ cv::RotatedRect RotatedRect_pt(const cv::Point2f &_point1, const cv::Point2f &_p
     return cv::RotatedRect(_center, cv::Size2f(_width, _height), _angle);
 }
 
-face_metrics::face_metrics(dlib::full_object_detection &shape)
+face_metrics::face_metrics(double cols, double rows, dlib::full_object_detection &shape): focal_length(focal_length), center(center)
 {
     cv::Mat center_points = get_center_points(shape);
     cv::Mat eye_points = get_eye_points(shape);
@@ -161,6 +161,9 @@ face_cropper::face_cropper()
 template <typename T>
 void face_cropper::detect(dlib::cv_image<T> &image)
 {
+    double focal_length = image.nc();
+    cv::Point2d center = cv::Point2d(image.nc() / 2., image.nr() / 2);
+
     faces.clear();
     faces = detector(image);
 

@@ -85,8 +85,10 @@ struct face_metrics
     double l4, l4mod, l8;
     head_pose pose;
     double roll, pitch, yaw;
+    double focal_length;
+    cv::Point2d center;
 
-    face_metrics(dlib::full_object_detection &shape);
+    face_metrics(double focal_length, cv::Point2d center, dlib::full_object_detection &shape);
     cv::Mat get_points_index(int index[], const int &n_index, dlib::full_object_detection &shape);
     cv::Mat get_center_points(dlib::full_object_detection &shape);
     cv::Mat get_eye_points(dlib::full_object_detection &shape);
