@@ -252,6 +252,10 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
 
     decomposeProjectionMatrix(projection_matrix, projection, rotation, translation_vector,
                               cv::noArray(), cv::noArray(), cv::noArray(), eulerAngles);
+    yaw = eulerAngles[1];
+    pitch = eulerAngles[0];
+    roll = eulerAngles[2];
+
     return pose;
 }
 
