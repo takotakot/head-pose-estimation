@@ -163,7 +163,7 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
 {
     cv::Mat projectionMat = cv::Mat::zeros(3, 3, CV_32F);
     cv::Matx33d projection = projectionMat;
-
+    std::cerr << __LINE__ << std::endl;
     projection(0, 0) = focal_length;
     projection(1, 1) = focal_length;
     projection(0, 2) = center.x;
@@ -181,7 +181,7 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
     head_points.push_back(P3D_NOSE);
 //    head_points.push_back(P3D_SUBNASALE);
     head_points.push_back(P3D_STOMMION);
-
+    std::cerr << __LINE__ << std::endl;
     std::vector<cv::Point2f> detected_points;
 
     detected_points.push_back(coordsOf(shape, SELLION));
@@ -191,11 +191,11 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
     detected_points.push_back(coordsOf(shape, LEFT_SIDE));
     detected_points.push_back(coordsOf(shape, MENTON));
     detected_points.push_back(coordsOf(shape, NOSE));
-    detected_points.push_back(coordsOf(shape, SUBNASALE));
+//    detected_points.push_back(coordsOf(shape, SUBNASALE));
 
     auto stomion = (coordsOf(shape, MOUTH_CENTER_TOP) + coordsOf(shape, MOUTH_CENTER_BOTTOM)) * 0.5;
     detected_points.push_back(stomion);
-
+std::cerr << __LINE__ << std::endl;
     cv::Mat rotation_vector, translation_vector;
 
     // Find the 3D pose of our head
@@ -207,10 +207,10 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
 #else
              cv::ITERATIVE);
 #endif
-
+std::cerr << __LINE__ << std::endl;
     cv::Matx33d rotation;
     cv::Rodrigues(rotation_vector, rotation);
-
+std::cerr << __LINE__ << std::endl;
     head_pose pose = {
         rotation(0, 0), rotation(0, 1), rotation(0, 2), translation_vector.at<double>(0) / 1000,
         rotation(1, 0), rotation(1, 1), rotation(1, 2), translation_vector.at<double>(1) / 1000,
@@ -227,7 +227,7 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
     {
         cv::circle(_debug, point, 2, cv::Scalar(0, 255, 255), 2);
     }
-
+std::cerr << __LINE__ << std::endl;
     std::vector<cv::Point3f> axes;
     axes.push_back(cv::Point3f(0, 0, 0));
     axes.push_back(cv::Point3f(50, 0, 0));
@@ -235,22 +235,22 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
     axes.push_back(cv::Point3f(0, 0, 50));
     std::vector<cv::Point2f> projected_axes;
 
-    cv::projectPoints(axes, rotation_vetor, translation_vector, projection, cv::noArray(), projected_axes);
-
+    cv::projectPoints(axes, rotation_vector, translation_vector, projection, cv::noArray(), projected_axes);
+std::cerr << __LINE__ << std::endl;
     cv::line(_debug, projected_axes[0], projected_axes[3], cv::Scalar(255, 0, 0), 2, CV_AA);
     cv::line(_debug, projected_axes[0], projected_axes[2], cv::Scalar(0, 255, 0), 2, CV_AA);
     cv::line(_debug, projected_axes[0], projected_axes[1], cv::Scalar(0, 0, 255), 2, CV_AA);
 
     // putText(_debug, "(" + to_string(int(pose(0, 3) * 100)) + "cm, " + to_string(int(pose(1, 3) * 100)) + "cm, " + to_string(int(pose(2, 3) * 100)) + "cm)", coordsOf(shape, SELLION), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
 #endif
-
+std::cerr << __LINE__ << std::endl;
     cv::Matx34d projection_matrix = {
         rotation(0, 0), rotation(0, 1), rotation(0, 2), 0,
         rotation(1, 0), rotation(1, 1), rotation(1, 2), 0,
         rotation(2, 0), rotation(2, 1), rotation(2, 2), 0};
 
     cv::Vec3d eulerAngles;
-
+    std::cerr << __LINE__ << std::endl;
     decomposeProjectionMatrix(projection_matrix, projection, rotation, translation_vector,
                               cv::noArray(), cv::noArray(), cv::noArray(), eulerAngles);
     yaw = eulerAngles[1];
