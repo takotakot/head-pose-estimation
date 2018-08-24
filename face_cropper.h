@@ -75,6 +75,8 @@ enum FACIAL_FEATURE
 };
 
 cv::RotatedRect RotatedRect_pt(const cv::Point2f &_point1, const cv::Point2f &_point2, const cv::Point2f &_point3);
+bool isRotationMatrix(cv::Mat &R);
+cv::Vec3d rotationMatrixToEulerAngles(cv::Mat &R);
 
 struct face_metrics
 {
@@ -90,6 +92,7 @@ struct face_metrics
     double l4, l4mod, l8;
     head_pose pose;
     double roll, pitch, yaw;
+    double roll2, pitch2, yaw2;
     double focal_length;
     cv::Point2d center;
 #ifdef HEAD_POSE_ESTIMATION_DEBUG

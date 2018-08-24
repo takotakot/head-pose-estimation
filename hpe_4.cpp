@@ -11,6 +11,7 @@
 #include <dlib/opencv.h>
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_processing.h>
+#include "face_cropper.h"
 
 // #define FPOINT(x, y, z) ((y), -(z), -(x))
 #define FPOINT(x, y, z) ((y), -(z), (x))
@@ -18,74 +19,26 @@
 using namespace std;
 using namespace cv;
 
-enum FACIAL_FEATURE
-{
-    NOSE = 30,
-    SUBNASALE = 33,
-    RIGHT_EYE = 36,
-    LEFT_EYE = 45,
-    RIGHT_SIDE = 0,
-    LEFT_SIDE = 16,
-    EYEBROW_RIGHT = 21,
-    EYEBROW_LEFT = 22,
-    MOUTH_UP = 51,
-    MOUTH_DOWN = 57,
-    MOUTH_RIGHT = 48,
-    MOUTH_LEFT = 54,
-    SELLION = 27,
-    MOUTH_CENTER_TOP = 62,
-    MOUTH_CENTER_BOTTOM = 66,
-    MENTON = 8
-};
-
-cv::Point2d toCv(const dlib::point &p)
-{
-    return cv::Point2d(p.x(), p.y());
-}
-
 cv::Point2d coordsOf(dlib::full_object_detection &shape, FACIAL_FEATURE feature)
 {
     return toCv(shape.part(feature));
 }
 
-// Checks if a matrix is a valid rotation matrix.
-bool isRotationMatrix(Mat &R)
-{
-    cv::Mat Rt;
-    cv::transpose(R, Rt);
-    cv::Mat shouldBeIdentity = Rt * R;
-    cv::Mat I = cv::Mat::eye(3, 3, shouldBeIdentity.type());
+/*
+void RotationMatrixToEulerAngles(const Eigen::Matrix3d& R, double* rx,
+                                 double* ry, double* rz) {
+  *rx = std::atan2(-R(1, 2), R(2, 2));
+  *ry = std::asin(R(0, 2));
+  *rz = std::atan2(-R(0, 1), R(0, 0));
 
-    return cv::norm(I, shouldBeIdentity) < 1e-6;
+  *rx = IsNaN(*rx) ? 0 : *rx;
+  *ry = IsNaN(*ry) ? 0 : *ry;
+  *rz = IsNaN(*rz) ? 0 : *rz;
 }
-
-// Calculates rotation matrix to euler angles
-// The result is the same as MATLAB except the order
-// of the euler angles ( x and z are swapped ).
-cv::Vec3f rotationMatrixToEulerAngles(cv::Mat &R)
-{
-
-    assert(isRotationMatrix(R));
-
-    float sy = std::sqrt(R.at<double>(0, 0) * R.at<double>(0, 0) + R.at<double>(1, 0) * R.at<double>(1, 0));
-
-    bool singular = sy < 1e-6; // If
-
-    float x, y, z;
-    if (!singular)
-    {
-        x = std::atan2(R.at<double>(2, 1), R.at<double>(2, 2));
-        y = std::atan2(-R.at<double>(2, 0), sy);
-        z = std::atan2(R.at<double>(1, 0), R.at<double>(0, 0));
-    }
-    else
-    {
-        x = std::atan2(-R.at<double>(1, 2), R.at<double>(1, 1));
-        y = std::atan2(-R.at<double>(2, 0), sy);
-        z = 0;
-    }
-    return cv::Vec3f(x, y, z);
-}
+*/
+// https://programtalk.com/python-examples-amp/cv2.solvePnP/
+// https://github.com/mpatacchiola/deepgaze/issues/40
+// https://www.google.co.jp/imgres?imgurl=https%3A%2F%2Fuser-images.githubusercontent.com%2F13165885%2F35375847-7b3d1752-01e3-11e8-8df2-d64f8ccd4866.png&imgrefurl=https%3A%2F%2Fgithub.com%2Fmpatacchiola%2Fdeepgaze%2Fissues%2F40&docid=PdE2lGhifxAdNM&tbnid=sFmeN1elqvPSOM%3A&vet=10ahUKEwjFg-D0n4LdAhWPad4KHRDCADMQMwg5KAgwCA..i&w=302&h=225&bih=934&biw=1588&q=rotationMatrixToEulerAngles&ved=0ahUKEwjFg-D0n4LdAhWPad4KHRDCADMQMwg5KAgwCA&iact=mrc&uact=8#h=225&imgdii=sFmeN1elqvPSOM:&vet=10ahUKEwjFg-D0n4LdAhWPad4KHRDCADMQMwg5KAgwCA..i&w=302
 
 int main(int argc, char **argv)
 {

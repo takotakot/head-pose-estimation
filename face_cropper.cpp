@@ -25,6 +25,45 @@ cv::RotatedRect RotatedRect_pt(const cv::Point2f &_point1, const cv::Point2f &_p
     return cv::RotatedRect(_center, cv::Size2f(_width, _height), _angle);
 }
 
+// Checks if a matrix is a valid rotation matrix.
+bool isRotationMatrix(cv::Mat &R)
+{
+    cv::Mat Rt;
+    cv::transpose(R, Rt);
+    cv::Mat shouldBeIdentity = Rt * R;
+    cv::Mat I = cv::Mat::eye(3, 3, shouldBeIdentity.type());
+
+    return cv::norm(I, shouldBeIdentity) < 1e-6;
+}
+
+// Calculates rotation matrix to euler angles
+// The result is the same as MATLAB except the order
+// of the euler angles ( x and z are swapped ).
+cv::Vec3d rotationMatrixToEulerAngles(cv::Mat &R)
+{
+
+    assert(isRotationMatrix(R));
+
+    double sy = std::sqrt(R.at<double>(0, 0) * R.at<double>(0, 0) + R.at<double>(1, 0) * R.at<double>(1, 0));
+
+    bool singular = sy < 1e-6; // If
+
+    double x, y, z;
+    if (!singular)
+    {
+        x = std::atan2(R.at<double>(2, 1), R.at<double>(2, 2));
+        y = std::atan2(-R.at<double>(2, 0), sy);
+        z = std::atan2(R.at<double>(1, 0), R.at<double>(0, 0));
+    }
+    else
+    {
+        x = std::atan2(-R.at<double>(1, 2), R.at<double>(1, 1));
+        y = std::atan2(-R.at<double>(2, 0), sy);
+        z = 0;
+    }
+    return cv::Vec3d(x, y, z);
+}
+
 face_metrics::face_metrics(double focal_length, cv::Point2d center, dlib::full_object_detection &shape) : focal_length(focal_length), center(center)
 {
     cv::Mat center_points = get_center_points(shape);
@@ -36,6 +75,8 @@ face_metrics::face_metrics(double focal_length, cv::Point2d center, dlib::full_o
     c1 = pca_center_points.eigenvectors.row(1);
     cv::reduce(eye_points, ue, 0, CV_REDUCE_AVG);
 
+    pose = face_metrics::calc_pose(shape);
+
     mo2 = (ue - uc) * c0.t() * c0 + uc;
 
     l16 = c0.dot(get_chin(shape) - mo2);
@@ -45,11 +86,13 @@ face_metrics::face_metrics(double focal_length, cv::Point2d center, dlib::full_o
     l8 = l16 * length_8 / length_16;
     // heuristic: if l16 is too small compared to l11, set l4mod longer
     // TODO: refine
-    l4mod = l4 * 1.2;
+    double l4mod_coef = 1.1;
+    if (pose.pitch2 < 1.416) {
+        l4mod_coef += 1.416 - pose.pitch2;
+    }
+    l4mod = l4 * l4mod_coef;
     std::cerr << l16 << std::endl;
     // std::cerr << l4 << std::endl;
-
-    pose = face_metrics::calc_pose(shape);
 }
 
 cv::Point2f face_metrics::coordsOf(dlib::full_object_detection &shape, FACIAL_FEATURE feature)
@@ -112,6 +155,13 @@ std::vector<type_point> face_metrics::get_face_rect()
     cv::Mat tmp;
     std::vector<type_point> rect;
 
+    // TODO: refine
+    // Strategy1: if yaw2 is largeer than -1.63 move left
+    // less than -1.63 move right
+    // Strategy2: move counter ward from the point which is in the middle of ears
+    double yaw2_diff = pose.yaw2 - (-1.63);
+    double y2d_cos = std::cos(yaw2_diff);
+
     tmp = mo2 - (l4mod - l16) * c0 - (l8 / 2) * c1;
     rect.push_back(type_point(tmp));
 
@@ -151,7 +201,16 @@ std::vector<type_point> face_metrics::get_crop_rect()
 void face_metrics::dump_metric(std::ostream &os)
 {
     os << l16 << "\t" << l11 << "\t" << l11 / l16 << "\t";
-    os << roll << "\t" << pitch << "\t" << yaw;
+    os << roll << "\t" << pitch << "\t" << yaw << "\t";
+
+    // roll: large clockwise, small unticlockwise (viewing from object)
+    // avg: 0.578
+    // pitch: large up,  small down
+    // avg: 1.42
+    // yaw: large right, small left (viewing from object)
+    // avg: -1.63
+    // if too big, move left (viewing from camera)
+    os << roll2 << "\t" << pitch2 << "\t" << yaw2;
 }
 
 void face_metrics::add_debug_image(cv::Mat &image)
@@ -250,12 +309,21 @@ std::cerr << __LINE__ << std::endl;
         rotation(2, 0), rotation(2, 1), rotation(2, 2), 0};
 
     cv::Vec3d eulerAngles;
+
     std::cerr << __LINE__ << std::endl;
     decomposeProjectionMatrix(projection_matrix, projection, rotation, translation_vector,
                               cv::noArray(), cv::noArray(), cv::noArray(), eulerAngles);
     yaw = eulerAngles[1];
     pitch = eulerAngles[0];
     roll = eulerAngles[2];
+
+    cv::Mat rotation2;
+    cv::Rodrigues(rotation_vector, rotation2);
+    cv::Vec3d eulerAngles2 = rotationMatrixToEulerAngles(rotation2);
+
+    roll2 = eulerAngles2[0];
+    pitch2 = eulerAngles2[1];
+    yaw2 = eulerAngles2[2];
 
     return pose;
 }
