@@ -79,6 +79,14 @@ face_metrics::face_metrics(double focal_length, cv::Point2d center, dlib::full_o
 
     mo2 = (ue - uc) * c0.t() * c0 + uc;
 
+    cv::Mat t_right(cv::Size(2, 1), CV_64FC1), t_left(cv::Size(2, 1), CV_64FC1);
+    t_right.at<double>(0, 0) = shape.part(RIGHT_SIDE).x();
+    t_right.at<double>(0, 1) = shape.part(RIGHT_SIDE).y();
+    t_left.at<double>(0, 0) = shape.part(LEFT_SIDE).x();
+    t_left.at<double>(0, 1) = shape.part(LEFT_SIDE).y();
+
+    mid_side = (t_right + t_left) / 2;
+
     l16 = c0.dot(get_chin(shape) - mo2);
     double dx = shape.part(16).x() - shape.part(0).x(), dy = shape.part(16).y() - shape.part(0).y();
     l11 = std::sqrt(dx * dx + dy * dy);
@@ -87,8 +95,8 @@ face_metrics::face_metrics(double focal_length, cv::Point2d center, dlib::full_o
     // heuristic: if l16 is too small compared to l11, set l4mod longer
     // TODO: refine
     double l4mod_coef = 1.1;
-    if (pose.pitch2 < 1.416) {
-        l4mod_coef += 1.416 - pose.pitch2;
+    if (pitch2 < 1.416) {
+        l4mod_coef += 1.416 - pitch2;
     }
     l4mod = l4 * l4mod_coef;
     std::cerr << l16 << std::endl;
@@ -144,23 +152,11 @@ std::vector<double> calc_euler(dlib::full_object_detection &shape)
     return std::vector<double>();
 }
 
-/*
-        Refactorization is needed:
-        http://tessy.org/wiki/index.php?%B9%D4%CE%F3%A4%CE%BE%E8%BB%BB%A1%A4%C6%E2%C0%D1%A1%A4%B3%B0%C0%D1
-        https://qiita.com/fukushima1981/items/d283b3af3e21d94550c4
-        https://qiita.com/ChaoticActivity/items/68f10d7452680fa1d52d
-    */
+// unused
 std::vector<type_point> face_metrics::get_face_rect()
 {
     cv::Mat tmp;
     std::vector<type_point> rect;
-
-    // TODO: refine
-    // Strategy1: if yaw2 is largeer than -1.63 move left
-    // less than -1.63 move right
-    // Strategy2: move counter ward from the point which is in the middle of ears
-    double yaw2_diff = pose.yaw2 - (-1.63);
-    double y2d_cos = std::cos(yaw2_diff);
 
     tmp = mo2 - (l4mod - l16) * c0 - (l8 / 2) * c1;
     rect.push_back(type_point(tmp));
@@ -177,13 +173,43 @@ std::vector<type_point> face_metrics::get_face_rect()
     return rect;
 }
 
+cv::Mat face_metrics::get_crop_upleft()
+{
+    const double m1 = 40, m2 = 30, m3 = 3.5, m4 = 30;
+    cv::Mat tmp, diff;
+    // TODO: refine
+    // Strategy1: if yaw2 is largeer than -1.63 move left
+    // less than -1.63 move right
+    // Strategy2: move counter ward from the point which is in the middle of ears
+    // double yaw2_diff = yaw2 - (-1.63);
+    // double y2d_cos = std::cos(yaw2_diff);
+
+    int mode = 2;
+
+    tmp = mo2 - (l4mod + l4mod * m3 / m4 - l16) * c0 - (l4mod * m2 / m4 / 2) * c1;
+    if (mode == 2)
+    {
+        diff = mid_side - uc;
+        std::cerr << "mid_side - uc: " << diff << std::endl;
+        tmp += (diff * c1.t() * c1) / 2;
+    }
+
+    return tmp;
+}
+
+/*
+        Refactorization is needed:
+        http://tessy.org/wiki/index.php?%B9%D4%CE%F3%A4%CE%BE%E8%BB%BB%A1%A4%C6%E2%C0%D1%A1%A4%B3%B0%C0%D1
+        https://qiita.com/fukushima1981/items/d283b3af3e21d94550c4
+        https://qiita.com/ChaoticActivity/items/68f10d7452680fa1d52d
+    */
 std::vector<type_point> face_metrics::get_crop_rect()
 {
     const double m1 = 40, m2 = 30, m3 = 3.5, m4 = 30;
     cv::Mat tmp;
     std::vector<type_point> rect;
 
-    tmp = mo2 - (l4mod + l4mod * m3 / m4 - l16) * c0 - (l4mod * m2 / m4 / 2) * c1;
+    tmp = get_crop_upleft();
     rect.push_back(type_point(tmp));
 
     tmp += (l4mod * m1 / m4) * c0;

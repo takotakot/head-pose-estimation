@@ -82,6 +82,7 @@ struct face_metrics
 {
     const int chin_index = 8;
     cv::Mat uc, c0, c1, ue, mo2;
+    cv::Mat mid_side;
     // From AIST人体寸法データベース
     const double length_4 = 231.9;
     const double length_16 = 121.1;
@@ -107,6 +108,7 @@ struct face_metrics
     cv::Mat get_chin(dlib::full_object_detection &shape);
     std::vector<double> calc_euler(dlib::full_object_detection &shape);
     std::vector<type_point> get_face_rect();
+    cv::Mat get_crop_upleft();
     std::vector<type_point> get_crop_rect();
     void dump_metric(std::ostream &os);
 #ifdef HEAD_POSE_ESTIMATION_DEBUG
