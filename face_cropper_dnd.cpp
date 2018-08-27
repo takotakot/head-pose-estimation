@@ -1,4 +1,6 @@
 #include "face_cropper.h"
+#include "read_srcs.h"
+#include <ctime>
 
 struct face_detect_result
 {
@@ -17,6 +19,28 @@ std::string result_file_name = "result_metric.txt";
 
 int main(int argc, char *argv[])
 {
+    time_t timer;
+    timer = time(NULL);
+    struct tm *timeinfo;
+    timeinfo = localtime(&timer);
+    char sbuf[256];
+    std::strftime(sbuf, 256, "_%F_%H%M", timeinfo);
+    struct src_set sst;
+
+    std::string dir_str = "c:\\cygwin64\\";
+    if (argc < 2)
+    {
+        // nop
+    }
+    else
+    {
+        for (int i = 1; i < argc; ++i)
+        {
+            dir_str = argv[i];
+            sst.add(dir_str);
+        }
+    }
+
     // std::cerr << "begin" << std::endl;
     std::string buf;
     int w, h;
