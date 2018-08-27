@@ -7,7 +7,7 @@ INCPATH = -I ~/dlib_install/include
 LIBPATH = -L ~/dlib_install/lib
 LIBRARY = -lopencv_calib3d -lopencv_features2d -lopencv_imgproc -lopencv_core -lopencv_highgui -ldlib
 
-TARGET = hpe_4 multi_face_cropper
+TARGET = hpe_4 multi_face_cropper single_face_cropper
 OBJS = face_cropper.o hpe_3.o
 
 .PHONY = test
