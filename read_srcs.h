@@ -18,9 +18,10 @@ struct src
 {
     // 1 file, 2 dir
     int type;
+    std::string name;
     std::string filename;
     struct readdir_recursive dir;
-    void read(std::string name);
+    void read(std::string _name);
     void dump(std::ostream &os);
 };
 

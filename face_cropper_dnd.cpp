@@ -10,6 +10,28 @@ struct face_detect_result
     int detected; // 0|1
 };
 
+void create_all(std::string date_suffix, struct src_set sst)
+{
+    std::string dest_dirname;
+    for (auto src : sst.srcs)
+    {
+        if(src.type == 2) {
+            dest_dirname = src.name + "/../" + date_suffix + "/";
+            if (mkdir(dest_dirname.c_str() ，
+                          S_IRUSR | S_IWUSR | S_IXUSR | /* rwx */
+                          S_IRGRP | S_IWGRP | S_IXGRP | /* rwx */
+                          S_IROTH | S_IXOTH | S_IXOTH)  /* rwx */
+                == 0)
+            {
+
+            {
+            }else{
+                std::cerr << "create error" << std::endl;
+            }
+        }
+    }
+}
+
 std::string in_dir_name = "to_recognize/";
 std::string out_dir_name = "dlib_results/";
 std::string file_list_name = "to_recognize_list_all.txt";
@@ -25,12 +47,14 @@ int main(int argc, char *argv[])
     timeinfo = localtime(&timer);
     char sbuf[256];
     std::strftime(sbuf, 256, "_%F_%H%M", timeinfo);
+    std::string date_suffix(sbuf);
     struct src_set sst;
 
     std::string dir_str = "c:\\cygwin64\\";
     if (argc < 2)
     {
         // nop
+        return 0;
     }
     else
     {
@@ -40,6 +64,8 @@ int main(int argc, char *argv[])
             sst.add(dir_str);
         }
     }
+
+    create_all(date_suffix, sst);
 
     // std::cerr << "begin" << std::endl;
     std::string buf;

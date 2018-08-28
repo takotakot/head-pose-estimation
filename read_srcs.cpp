@@ -3,7 +3,6 @@
 #include <string>
 #include <cstring>
 #include <cstdio>
-#include <vector>
 #include <dirent.h>
 #include <sys/stat.h>
 
@@ -76,8 +75,9 @@ void readdir_recursive::dump(std::ostream &os)
     }
 }
 
-void src::read(std::string name)
+void src::read(std::string _name)
 {
+    name = _name;
     struct stat s;
     if (stat(name.c_str(), &s) == 0)
     {
