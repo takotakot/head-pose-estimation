@@ -4,14 +4,6 @@
 #include <ctime>
 #include<sys/stat.h>
 
-struct face_detect_result
-{
-    // int w, h;
-    int rx, ry;
-    int rw, rh;
-    int detected; // 0|1
-};
-
 int main(int argc, char *argv[])
 {
     time_t timer;
@@ -45,10 +37,7 @@ int main(int argc, char *argv[])
     std::string result_file_name = "result_metric.txt";
 
     std::string buf;
-    int w, h;
-    face_detect_result prev_result;
     // read file list
-    std::vector<face_detect_result> results;
     std::ofstream ofs;
     ofs.open(result_file_name.c_str());
     //        file_list.push_back(buf);
