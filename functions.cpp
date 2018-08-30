@@ -1,4 +1,5 @@
 #include "functions.h"
+#include <sys/stat.h>
 
 void create_all(std::string date_suffix, struct src_set sst)
 {

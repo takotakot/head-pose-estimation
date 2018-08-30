@@ -17,7 +17,7 @@ OBJS = face_cropper.o hpe_3.o read_srcs.o functions.o
 
 all: $(OBJS) $(TARGET)
 
-$(TARGET): % : %.o face_cropper.o read_srcs.o
+$(TARGET): % : %.o face_cropper.o read_srcs.o functions.o
 	$(CXX) $(CXXFLAGS) $(LIBPATH) $^ $(LIBRARY) -o $*
 
 test: all
