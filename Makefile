@@ -8,7 +8,7 @@ LIBPATH = -L ~/dlib_install/lib
 LIBRARY = -lopencv_calib3d -lopencv_features2d -lopencv_imgproc -lopencv_core -lopencv_highgui -ldlib
 
 TARGET = hpe_4 multi_face_cropper single_face_cropper face_cropper_dnd
-OBJS = face_cropper.o hpe_3.o read_srcs.o
+OBJS = face_cropper.o hpe_3.o read_srcs.o functions.o
 
 .PHONY = test
 
