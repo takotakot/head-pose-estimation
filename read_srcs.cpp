@@ -3,6 +3,7 @@
 #include <string>
 #include <cstring>
 #include <cstdio>
+#include <algorithm>
 #include <dirent.h>
 #include <sys/stat.h>
 
@@ -59,6 +60,7 @@ void readdir_recursive::read_all(std::string dir_str, std::string subdir_str)
         perror("dir");
         // return 1;
     }
+    std::sort(filelist.begin(), filelist.end());
 }
 
 void readdir_recursive::dump(std::ostream &os)
@@ -105,6 +107,7 @@ void src::read(std::string _name)
 
 void src::dump(std::ostream &os)
 {
+    os << "name: " << name << std::endl;
     if (type == 1)
     {
         os << "file: " << filename << std::endl;
