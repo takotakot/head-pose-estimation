@@ -1,4 +1,7 @@
 #include "functions.h"
+
+#include <string>
+#include <algorithm>
 #include <sys/stat.h>
 
 void create_all(std::string date_suffix, struct src_set sst)
@@ -41,4 +44,23 @@ void create_all(std::string date_suffix, struct src_set sst)
             }
         }
     }
+}
+
+std::string append_date_suffix(std::string read_img_name, std::string date_suffix){
+    std::string slash = "/", dot = ".";
+    std::string::size_type last_slash, last_dot;
+    std::string appended_filename;
+
+    last_slash = read_img_name.find_last_of(slash);
+    if (last_slash == std::string::npos) {
+        last_slash = 0;
+    }
+    std::string filename = read_img_name.substr(last_slash);
+    last_dot = filename.find_last_of(dot);
+    if (last_dot == std::string::npos) {
+        appended_filename = read_img_name + date_suffix + ".jpg";
+        return appended_filename;
+    }
+    appended_filename = read_img_name.substr(0, std::max(last_slash + last_dot -1, (std::__cxx11::basic_string<char>::size_type) 0)) + date_suffix + filename.substr(last_dot);
+    return appended_filename;
 }

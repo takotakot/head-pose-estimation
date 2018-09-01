@@ -3,5 +3,6 @@
 #include "read_srcs.h"
 
 void create_all(std::string date_suffix, struct src_set sst);
+std::string append_date_suffix(std::string read_img_name, std::string date_suffix);
 
 #endif // FUNCTIONS_H_
