@@ -46,25 +46,28 @@ int main(int argc, char *argv[])
 
     // #pragma omp parallel for private(read_img_name, write_img_name, img_color, recog_ok, cropper_obj)
     // private(read_img_name, write_img_name, img_color, recog_ok)
-    // #pragma omp parallel
+    #pragma omp parallel
     {
         // cropper cropper_obj;
         face_cropper cropper;
         char buffer[5];
-        std::stringstream obuf;
+        // std::stringstream obuf;
         cv::Mat img_color, o_img;
         
         std::string filename, read_img_name, write_img_name, dest_dirname;
         std::ostringstream oss;
 
-        //#pragma omp for
+        // #pragma omp for
         for(auto src: sst.srcs)
         {
             if(src.type == 1) {
                 // TODO: treat single file
                 oss.str("");
                 read_img_name = src.filename;
-                std::cerr << read_img_name << std::endl;
+                #pragma omp critical
+                {
+                    std::cerr << read_img_name << std::endl;
+                }
                 write_img_name = append_date_suffix(read_img_name, date_suffix);
                 // std::cerr << write_img_name << std::endl;
 
@@ -99,19 +102,27 @@ int main(int argc, char *argv[])
                     // std::cerr << "write: " << filename << std::endl;
                     oss << filename << "\t";
                     cropper.dump_metric(i, oss);
-                    std::cerr << oss.str() << std::endl;
-                    ofs << oss.str() << std::endl;
+                    #pragma omp critical
+                    {
+                        std::cerr << oss.str() << std::endl;
+                        ofs << oss.str() << std::endl;
+                    }
                 }
             }
             else if (src.type == 2)
             {
                 dest_dirname = src.name + "/../" + src.name + date_suffix + "/";
+                #pragma omp for
                 for (int i = 0; i < src.dir.filelist.size(); ++i)
                 {
                     oss.str("");
                     // http://stackoverflow.com/questions/15033827/multiple-threads-writing-to-stdcout-or-stdcerr
-                    std::cerr << src.dir.filelist[i] << std::endl;
 
+                    #pragma omp critical
+                    {
+                        std::cerr << src.dir.filelist[i] << std::endl;
+                    }
+                    
                     // name
         //            read_img_name = in_dir_name + file_list[i];
         //            write_img_name = out_dir_name + file_list[i];
@@ -127,7 +138,10 @@ int main(int argc, char *argv[])
                     cropper.detect(cimg);
 
                     if ( 0 == cropper.get_num_faces()) {
-                        std::cerr << "no face is detected in: " << read_img_name << std::endl;
+                        #pragma omp critical
+                        {
+                            std::cerr << "no face is detected in: " << read_img_name << std::endl;
+                        }
                     }
                     for (int i = 0; i < cropper.get_num_faces(); ++i)
                     {
@@ -150,17 +164,21 @@ int main(int argc, char *argv[])
                         // std::cerr << "write: " << filename << std::endl;
                         oss << filename << "\t";
                         cropper.dump_metric(i, oss);
+                    }
+                    #pragma omp critical
+                    {
                         std::cerr << oss.str() << std::endl;
+                        // obuf << oss.str() << std::endl;
                         ofs << oss.str() << std::endl;
                     }
                 }
             }
         }
         // #pragma omp critical
-        {
-            //            ofs << obuf.str();
-        }
-    }
+        // {
+        //                 ofs << obuf.str();
+        // }
+    }  // end omp parallel
 
     return 0;
 }

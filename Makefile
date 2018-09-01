@@ -1,6 +1,6 @@
 CXX = g++-5
 
-CXXFLAGS = -pipe -std=gnu++11 -O2
+CXXFLAGS = -pipe -std=gnu++11 -O2 -fopenmp
 #INCPATH = -I/home/tako/progs/include
 #LIBPATH = -L/home/tako/progs/lib
 INCPATH = -I ~/dlib_install/include
@@ -21,4 +21,4 @@ $(TARGET): % : %.o face_cropper.o read_srcs.o functions.o
 	$(CXX) $(CXXFLAGS) $(LIBPATH) $^ $(LIBRARY) -o $*
 
 test: all
-	./hpe_4
+	time ./face_cropper_dnd to_recognize
