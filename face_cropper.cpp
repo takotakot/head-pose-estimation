@@ -94,9 +94,9 @@ face_metrics::face_metrics(double focal_length, cv::Point2d center, dlib::full_o
     l8 = l16 * length_8 / length_16;
     // heuristic: if l16 is too small compared to l11, set l4mod longer
     // TODO: refine
-    double l4mod_coef = 1.1;
+    double l4mod_coef = 1.15;
     if (pitch2 < 1.416) {
-        l4mod_coef += 1.416 - pitch2;
+        l4mod_coef += (1.416 - pitch2) * 1;
     }
     l4mod = l4 * l4mod_coef;
     std::cerr << l16 << std::endl;
