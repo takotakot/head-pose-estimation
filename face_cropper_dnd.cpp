@@ -61,47 +61,50 @@ int main(int argc, char *argv[])
         for(auto src: sst.srcs)
         {
             if(src.type == 1) {
-                // TODO: treat single file
-                oss.str("");
-                read_img_name = src.filename;
-                #pragma omp critical
+                #pragma omp single
                 {
-                    std::cerr << read_img_name << std::endl;
-                }
-                write_img_name = append_date_suffix(read_img_name, date_suffix);
-                // std::cerr << write_img_name << std::endl;
-
-                // code duplicated
-                img_color = cv::imread(read_img_name);
-                dlib::cv_image<dlib::bgr_pixel> cimg(img_color);
-
-                cropper.detect(cimg);
-
-                if (0 == cropper.get_num_faces())
-                {
-                    std::cerr << "no face is detected in: " << read_img_name << std::endl;
-                }
-                for (int i = 0; i < cropper.get_num_faces(); ++i)
-                {
-                    // std::cerr << __LINE__ << std::endl;
-                    cropper.crop_nth(img_color, i, o_img);
-                    // filename = get_write_img_name(write_img_name, i);
-                    if (i > 0)
+                    // TODO: treat single file
+                    oss.str("");
+                    read_img_name = src.filename;
+                    #pragma omp critical
                     {
-                        std::snprintf(buffer, sizeof(buffer), "_%d", i);
-                        filename = write_img_name;
-                        filename += buffer;
-                        filename += ".jpg";
-                        cv::imwrite(filename.c_str(), o_img);
+                        std::cerr << read_img_name << std::endl;
                     }
-                    else
+                    write_img_name = append_date_suffix(read_img_name, date_suffix);
+                    // std::cerr << write_img_name << std::endl;
+
+                    // code duplicated
+                    img_color = cv::imread(read_img_name);
+                    dlib::cv_image<dlib::bgr_pixel> cimg(img_color);
+
+                    cropper.detect(cimg);
+
+                    if (0 == cropper.get_num_faces())
                     {
-                        filename = write_img_name;
-                        cv::imwrite(write_img_name.c_str(), o_img);
+                        oss << "no face is detected in: " << read_img_name << std::endl;
                     }
-                    // std::cerr << "write: " << filename << std::endl;
-                    oss << filename << "\t";
-                    cropper.dump_metric(i, oss);
+                    for (int i = 0; i < cropper.get_num_faces(); ++i)
+                    {
+                        // std::cerr << __LINE__ << std::endl;
+                        cropper.crop_nth(img_color, i, o_img);
+                        // filename = get_write_img_name(write_img_name, i);
+                        if (i > 0)
+                        {
+                            std::snprintf(buffer, sizeof(buffer), "_%d", i);
+                            filename = write_img_name;
+                            filename += buffer;
+                            filename += ".jpg";
+                            cv::imwrite(filename.c_str(), o_img);
+                        }
+                        else
+                        {
+                            filename = write_img_name;
+                            cv::imwrite(write_img_name.c_str(), o_img);
+                        }
+                        // std::cerr << "write: " << filename << std::endl;
+                        oss << filename << "\t";
+                        cropper.dump_metric(i, oss);
+                    }
                     #pragma omp critical
                     {
                         std::cerr << oss.str() << std::endl;
@@ -138,10 +141,7 @@ int main(int argc, char *argv[])
                     cropper.detect(cimg);
 
                     if ( 0 == cropper.get_num_faces()) {
-                        #pragma omp critical
-                        {
-                            std::cerr << "no face is detected in: " << read_img_name << std::endl;
-                        }
+                        oss << "no face is detected in: " << read_img_name << std::endl;
                     }
                     for (int i = 0; i < cropper.get_num_faces(); ++i)
                     {
