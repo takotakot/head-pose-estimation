@@ -2,7 +2,11 @@
 #include "read_srcs.h"
 #include "functions.h"
 #include <ctime>
-#include<sys/stat.h>
+#include <sys/stat.h>
+
+#ifdef __CYGWIN__
+#include <sys/cygwin.h>
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -26,6 +30,25 @@ int main(int argc, char *argv[])
         for (int i = 1; i < argc; ++i)
         {
             dir_str = argv[i];
+            std::cerr << dir_str;
+#ifdef __CYGWIN__
+            ssize_t size;
+            char *posix;
+            size = cygwin_conv_path(CCP_WIN_A_TO_POSIX | CCP_PROC_CYGDRIVE, dir_str.c_str(), NULL, 0);
+            if (size < 0)
+            {
+                perror("cygwin_conv_path");
+            }
+            else
+            {
+                posix = (char *)malloc(size);
+                if (cygwin_conv_path(CCP_WIN_A_TO_POSIX | CCP_PROC_CYGDRIVE, dir_str.c_str(), posix, size))
+                    perror("cygwin_conv_path");
+            }
+            dir_str = posix;
+            std::cerr << "\t" << dir_str << std::endl;
+            free(posix);
+#endif
             sst.add(dir_str);
         }
     }

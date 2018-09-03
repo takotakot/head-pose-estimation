@@ -4,6 +4,22 @@
 #include <algorithm>
 #include <sys/stat.h>
 
+std::string get_dirname(std::string path) {
+    while (*path.rbegin() == '/')
+    {
+        path.erase(path.size() - 1);
+    }
+    std::string slash = "/", dot = ".";
+    std::string::size_type last_slash, last_dot;
+    last_slash = path.find_last_of(slash);
+    if (last_slash == std::string::npos)
+    {
+        // last_slash = 0;
+        return path;
+    }
+    return path.substr(last_slash + 1);
+}
+
 void create_all(std::string date_suffix, struct src_set sst)
 {
     std::string dest_dirname;
@@ -11,7 +27,7 @@ void create_all(std::string date_suffix, struct src_set sst)
     {
         if (src.type == 2)
         {
-            dest_dirname = src.name + "/../" + src.name + date_suffix + "/";
+            dest_dirname = src.name + "/../" + get_dirname(src.name) + date_suffix + "/";
             // std::cerr << "mkdir: " << dest_dirname << std::endl;
             if (mkdir(dest_dirname.c_str(),
                       S_IRUSR | S_IWUSR | S_IXUSR |     /* rwx */
