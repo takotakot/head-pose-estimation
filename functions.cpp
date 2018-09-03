@@ -61,6 +61,6 @@ std::string append_date_suffix(std::string read_img_name, std::string date_suffi
         appended_filename = read_img_name + date_suffix + ".jpg";
         return appended_filename;
     }
-    appended_filename = read_img_name.substr(0, std::max(last_slash + last_dot -1, (std::__cxx11::basic_string<char>::size_type) 0)) + date_suffix + filename.substr(last_dot);
+    appended_filename = read_img_name.substr(0, std::max(last_slash + last_dot -1, (std::string::size_type) 0)) + date_suffix + filename.substr(last_dot);
     return appended_filename;
 }
