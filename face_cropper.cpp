@@ -99,7 +99,7 @@ face_metrics::face_metrics(double focal_length, cv::Point2d center, dlib::full_o
         l4mod_coef += (1.416 - pitch2) * 1;
     }
     l4mod = l4 * l4mod_coef;
-    std::cerr << l16 << std::endl;
+    std::cerr << "l16: " << l16 << std::endl;
     // std::cerr << l4 << std::endl;
 }
 
@@ -190,7 +190,7 @@ cv::Mat face_metrics::get_crop_upleft()
     if (mode == 2)
     {
         diff = mid_side - uc;
-        std::cerr << "mid_side - uc: " << diff << std::endl;
+        // std::cerr << "mid_side - uc: " << diff << std::endl;
         tmp += (diff * c1.t() * c1) / 2;
     }
 
@@ -351,6 +351,7 @@ std::cerr << __LINE__ << std::endl;
     pitch2 = eulerAngles2[1];
     yaw2 = eulerAngles2[2];
 
+    std::cerr << __LINE__ << std::endl;
     return pose;
 }
 
@@ -367,7 +368,9 @@ void face_cropper::detect(dlib::cv_image<T> &image)
     cv::Point2d center = cv::Point2d(image.nc() / 2., image.nr() / 2);
 
     faces.clear();
+    std::cerr << __LINE__ << std::endl;
     faces = detector(image);
+    std::cerr << __LINE__ << std::endl;
 
     shapes.clear();
     metrics.clear();
