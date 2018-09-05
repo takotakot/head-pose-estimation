@@ -390,7 +390,7 @@ int face_cropper::get_num_faces()
 // https://qiita.com/vs4sh/items/93d65468a992af5b8f92
 void face_cropper::crop_rotatedrect(cv::Mat &i_img, cv::RotatedRect &rect, cv::Mat &o_img)
 {
-    cv::Mat rotation_matrix, rotated;
+    cv::Mat rotation_matrix, rotated = i_img;
 
     angle = rect.angle;
     cv::Size rect_size = rect.size;
@@ -404,7 +404,7 @@ void face_cropper::crop_rotatedrect(cv::Mat &i_img, cv::RotatedRect &rect, cv::M
     // 回転矩形の角度から回転行列を計算
     rotation_matrix = cv::getRotationMatrix2D(rect.center, angle, 1.0);
     // 元画像を回転
-    cv::warpAffine(i_img, rotated, rotation_matrix, i_img.size(), cv::INTER_CUBIC);
+    cv::warpAffine(i_img, rotated, rotation_matrix, rotated.size(), cv::INTER_CUBIC);
     // 回転した画像から矩形領域を切り出す
     cv::getRectSubPix(rotated, rect_size, rect.center, o_img);
 }
