@@ -2,14 +2,14 @@
 
 #define HAVE_ROTATEDRECT_3PT 0
 
-cv::RotatedRect RotatedRect_pt(const cv::Point2f &_point1, const cv::Point2f &_point2, const cv::Point2f &_point3)
+cv::RotatedRect RotatedRect_pt(const cv::Point2d &_point1, const cv::Point2d &_point2, const cv::Point2d &_point3)
 {
-    cv::Point2f _center = 0.5f * (_point1 + _point3);
-    cv::Vec2f vecs[2];
-    vecs[0] = cv::Vec2f(_point1 - _point2);
-    vecs[1] = cv::Vec2f(_point2 - _point3);
+    cv::Point2d _center = 0.5f * (_point1 + _point3);
+    cv::Vec2d vecs[2];
+    vecs[0] = cv::Vec2d(_point1 - _point2);
+    vecs[1] = cv::Vec2d(_point2 - _point3);
     // check that given sides are perpendicular
-    // CV_Assert(abs(vecs[0].dot(vecs[1])) / (norm(vecs[0]) * norm(vecs[1])) <= FLT_EPSILON);
+    CV_Assert(abs(vecs[0].dot(vecs[1])) / (norm(vecs[0]) * norm(vecs[1])) <= FLT_EPSILON);
 
     // wd_i stores which vector (0,1) or (1,2) will make the width
     // One of them will definitely have slope within -1 to 1
@@ -18,11 +18,11 @@ cv::RotatedRect RotatedRect_pt(const cv::Point2f &_point1, const cv::Point2f &_p
         wd_i = 1;
     int ht_i = (wd_i + 1) % 2;
 
-    float _angle = std::atan(vecs[wd_i][1] / vecs[wd_i][0]) * 180.0f / (float)CV_PI;
-    float _width = (float)cv::norm(vecs[wd_i]);
-    float _height = (float)cv::norm(vecs[ht_i]);
+    double _angle = std::atan(vecs[wd_i][1] / vecs[wd_i][0]) * 180.0f / (double)CV_PI;
+    double _width = (double)cv::norm(vecs[wd_i]);
+    double _height = (double)cv::norm(vecs[ht_i]);
 
-    return cv::RotatedRect(_center, cv::Size2f(_width, _height), _angle);
+    return cv::RotatedRect(_center, cv::Size2d(_width, _height), _angle);
 }
 
 // Checks if a matrix is a valid rotation matrix.
@@ -103,7 +103,7 @@ face_metrics::face_metrics(double focal_length, cv::Point2d center, dlib::full_o
     // std::cerr << l4 << std::endl;
 }
 
-cv::Point2f face_metrics::coordsOf(dlib::full_object_detection &shape, FACIAL_FEATURE feature)
+type_point face_metrics::coordsOf(dlib::full_object_detection &shape, FACIAL_FEATURE feature)
 {
     return toCv(shape.part(feature));
 }
@@ -255,7 +255,7 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
     projection(1, 2) = center.y;
     projection(2, 2) = 1;
 
-    std::vector<cv::Point3f> head_points;
+    std::vector<cv::Point3d> head_points;
 
     head_points.push_back(P3D_SELLION);
     head_points.push_back(P3D_RIGHT_EYE);
@@ -267,7 +267,7 @@ head_pose face_metrics::calc_pose(dlib::full_object_detection &shape)
 //    head_points.push_back(P3D_SUBNASALE);
     head_points.push_back(P3D_STOMMION);
     std::cerr << __LINE__ << std::endl;
-    std::vector<cv::Point2f> detected_points;
+    std::vector<type_point> detected_points;
 
     detected_points.push_back(coordsOf(shape, SELLION));
     detected_points.push_back(coordsOf(shape, RIGHT_EYE));
@@ -304,7 +304,7 @@ std::cerr << __LINE__ << std::endl;
 
 #ifdef HEAD_POSE_ESTIMATION_DEBUG
 
-    std::vector<cv::Point2f> reprojected_points;
+    std::vector<type_point> reprojected_points;
 
     cv::projectPoints(head_points, rotation_vector, translation_vector, projection, cv::noArray(), reprojected_points);
 

@@ -19,7 +19,7 @@
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_processing.h>
 
-typedef cv::Point2f type_point;
+typedef cv::Point2d type_point;
 typedef cv::Matx44d head_pose;
 
 // From: https://github.com/chili-epfl/attention-tracker/
@@ -29,26 +29,26 @@ typedef cv::Matx44d head_pose;
 // X points forward
 // Original
 
-const static cv::Point3f P3D_SELLION(0., 0., 0.);
-const static cv::Point3f P3D_RIGHT_EYE(-20., -65.5, -5.);
-const static cv::Point3f P3D_LEFT_EYE(-20., 65.5, -5.);
-const static cv::Point3f P3D_RIGHT_EAR(-100., -77.5, -6.);
-const static cv::Point3f P3D_LEFT_EAR(-100., 77.5, -6.);
-const static cv::Point3f P3D_NOSE(21.0, 0., -48.0);
-const static cv::Point3f P3D_STOMMION(10.0, 0., -75.0);
-const static cv::Point3f P3D_MENTON(0., 0., -133.0);
+const static cv::Point3d P3D_SELLION(0., 0., 0.);
+const static cv::Point3d P3D_RIGHT_EYE(-20., -65.5, -5.);
+const static cv::Point3d P3D_LEFT_EYE(-20., 65.5, -5.);
+const static cv::Point3d P3D_RIGHT_EAR(-100., -77.5, -6.);
+const static cv::Point3d P3D_LEFT_EAR(-100., 77.5, -6.);
+const static cv::Point3d P3D_NOSE(21.0, 0., -48.0);
+const static cv::Point3d P3D_STOMMION(10.0, 0., -75.0);
+const static cv::Point3d P3D_MENTON(0., 0., -133.0);
 
 // In mm scale
 /*
-const static cv::Point3f P3D_SELLION(0., 0., 0.);
-const static cv::Point3f P3D_RIGHT_EYE(-20., -45.55, -5.);
-const static cv::Point3f P3D_LEFT_EYE(-20., 45.55, -5.);
-const static cv::Point3f P3D_RIGHT_EAR(-100., -74.25, -6.);
-const static cv::Point3f P3D_LEFT_EAR(-100., 74.25, -6.);
-const static cv::Point3f P3D_NOSE(21.0, 0., -48.0);
-const static cv::Point3f P3D_SUBNASALE(0., 0., -48.0);
-const static cv::Point3f P3D_STOMION(10.0, 0., -75.0);
-const static cv::Point3f P3D_MENTON(-32.14, 0., -116.76);
+const static cv::Point3d P3D_SELLION(0., 0., 0.);
+const static cv::Point3d P3D_RIGHT_EYE(-20., -45.55, -5.);
+const static cv::Point3d P3D_LEFT_EYE(-20., 45.55, -5.);
+const static cv::Point3d P3D_RIGHT_EAR(-100., -74.25, -6.);
+const static cv::Point3d P3D_LEFT_EAR(-100., 74.25, -6.);
+const static cv::Point3d P3D_NOSE(21.0, 0., -48.0);
+const static cv::Point3d P3D_SUBNASALE(0., 0., -48.0);
+const static cv::Point3d P3D_STOMION(10.0, 0., -75.0);
+const static cv::Point3d P3D_MENTON(-32.14, 0., -116.76);
 */
 
 const static double THETA_0 = M_2_PI - std::acos((121.1 * 121.1 + 53.0 * 53.0 - 71.4 * 71.4) / (2 * 121.1 * 53.0));
@@ -74,7 +74,7 @@ enum FACIAL_FEATURE
     MENTON = 8
 };
 
-cv::RotatedRect RotatedRect_pt(const cv::Point2f &_point1, const cv::Point2f &_point2, const cv::Point2f &_point3);
+cv::RotatedRect RotatedRect_pt(const cv::Point2d &_point1, const cv::Point2d &_point2, const cv::Point2d &_point3);
 bool isRotationMatrix(cv::Mat &R);
 cv::Vec3d rotationMatrixToEulerAngles(cv::Mat &R);
 
@@ -95,13 +95,13 @@ struct face_metrics
     double roll, pitch, yaw;
     double roll2, pitch2, yaw2;
     double focal_length;
-    cv::Point2d center;
+    type_point center;
 #ifdef HEAD_POSE_ESTIMATION_DEBUG
     mutable cv::Mat _debug;
 #endif
 
     face_metrics(double focal_length, cv::Point2d center, dlib::full_object_detection &shape);
-    cv::Point2f coordsOf(dlib::full_object_detection &shape, FACIAL_FEATURE feature);
+    type_point coordsOf(dlib::full_object_detection &shape, FACIAL_FEATURE feature);
     cv::Mat get_points_index(int index[], const int &n_index, dlib::full_object_detection &shape);
     cv::Mat get_center_points(dlib::full_object_detection &shape);
     cv::Mat get_eye_points(dlib::full_object_detection &shape);
@@ -139,9 +139,9 @@ class face_cropper
     void dump_metric(int n, std::ostream &os);
 };
 
-inline cv::Point2f toCv(const dlib::point &p)
+inline type_point toCv(const dlib::point &p)
 {
-    return cv::Point2f(p.x(), p.y());
+    return type_point(p.x(), p.y());
 }
 
 #endif // FACE_CROPPER_HPP
