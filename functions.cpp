@@ -1,7 +1,9 @@
 #include "functions.h"
 
 #include <string>
+#include <sstream>
 #include <algorithm>
+#include <ctime>
 #include <sys/stat.h>
 
 std::string get_dirname(std::string path) {
@@ -79,4 +81,26 @@ std::string append_date_suffix(std::string read_img_name, std::string date_suffi
     }
     appended_filename = read_img_name.substr(0, std::max(last_slash + last_dot -1, (std::string::size_type) 0)) + date_suffix + filename.substr(last_dot);
     return appended_filename;
+}
+
+std::string get_date_suffix(){
+    time_t timer;
+    timer = time(NULL);
+    struct tm *timeinfo;
+    timeinfo = localtime(&timer);
+    char sbuf[256];
+    std::strftime(sbuf, 256, "_%F_%H%M", timeinfo);
+    return std::string(sbuf);
+}
+
+std::string get_nth_img_name(std::string img_name, int n)
+{
+    std::stringstream sst;
+    std::string filename = img_name;
+    if (n > 0)
+    {
+        sst << "_" << n << ".jpg";
+        filename += sst.str();
+    }
+    return filename;
 }

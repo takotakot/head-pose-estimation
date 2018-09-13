@@ -3,7 +3,6 @@
 #include "functions.h"
 
 #include <omp.h>
-#include <ctime>
 #include <sys/stat.h>
 
 #ifdef __CYGWIN__
@@ -12,13 +11,7 @@
 
 int main(int argc, char *argv[])
 {
-    time_t timer;
-    timer = time(NULL);
-    struct tm *timeinfo;
-    timeinfo = localtime(&timer);
-    char sbuf[256];
-    std::strftime(sbuf, 256, "_%F_%H%M", timeinfo);
-    std::string date_suffix(sbuf);
+    std::string date_suffix(get_date_suffix());
     struct src_set sst;
 
     std::string dir_str = "c:\\cygwin64\\";
@@ -75,7 +68,6 @@ int main(int argc, char *argv[])
     {
         // cropper cropper_obj;
         face_cropper cropper;
-        char buffer[5];
         // std::stringstream obuf;
         cv::Mat img_color, o_img;
 
@@ -124,20 +116,8 @@ int main(int argc, char *argv[])
                         {
                             // std::cerr << __LINE__ << std::endl;
                             cropper.crop_nth(img_color, i, o_img);
-                            // filename = get_write_img_name(write_img_name, i);
-                            if (i > 0)
-                            {
-                                std::snprintf(buffer, sizeof(buffer), "_%d", i);
-                                filename = write_img_name;
-                                filename += buffer;
-                                filename += ".jpg";
-                                cv::imwrite(filename.c_str(), o_img);
-                            }
-                            else
-                            {
-                                filename = write_img_name;
-                                cv::imwrite(write_img_name.c_str(), o_img);
-                            }
+                            filename = get_nth_img_name(write_img_name, i);
+                            cv::imwrite(filename.c_str(), o_img);
                             // std::cerr << "write: " << filename << std::endl;
                             oss << filename << "\t";
                             cropper.dump_metric(i, oss);
@@ -168,12 +148,6 @@ int main(int argc, char *argv[])
                         std::cerr << "th" << thread_num << ": " << src.dir.filelist[i] << std::endl;
                     }
 
-                    // name
-                    //            read_img_name = in_dir_name + file_list[i];
-                    //            write_img_name = out_dir_name + file_list[i];
-
-                    // read
-
                     read_img_name = src.name + "/" + src.dir.filelist[i];
                     write_img_name = dest_dirname + src.dir.filelist[i];
                     // TODO: skip non-image files
@@ -193,22 +167,10 @@ int main(int argc, char *argv[])
                         }
                         for (int i = 0; i < cropper.get_num_faces(); ++i)
                         {
-                            // std::cerr << __LINE__ << std::endl;
                             cropper.crop_nth(img_color, i, o_img);
-                            // filename = get_write_img_name(write_img_name, i);
-                            if (i > 0)
-                            {
-                                std::snprintf(buffer, sizeof(buffer), "_%d", i);
-                                filename = write_img_name;
-                                filename += buffer;
-                                filename += ".jpg";
-                                cv::imwrite(filename.c_str(), o_img);
-                            }
-                            else
-                            {
-                                filename = write_img_name;
-                                cv::imwrite(write_img_name.c_str(), o_img);
-                            }
+
+                            filename = get_nth_img_name(write_img_name, i);
+                            cv::imwrite(filename.c_str(), o_img);
                             // std::cerr << "write: " << filename << std::endl;
                             oss << filename << "\t";
                             cropper.dump_metric(i, oss);
