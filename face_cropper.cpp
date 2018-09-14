@@ -315,12 +315,12 @@ std::cerr << __LINE__ << std::endl;
         cv::circle(_debug, point, 2, cv::Scalar(0, 255, 255), 2);
     }
 std::cerr << __LINE__ << std::endl;
-    std::vector<cv::Point3f> axes;
-    axes.push_back(cv::Point3f(0, 0, 0));
-    axes.push_back(cv::Point3f(50, 0, 0));
-    axes.push_back(cv::Point3f(0, 50, 0));
-    axes.push_back(cv::Point3f(0, 0, 50));
-    std::vector<cv::Point2f> projected_axes;
+    std::vector<cv::Point3d> axes;
+    axes.push_back(cv::Point3d(0, 0, 0));
+    axes.push_back(cv::Point3d(50, 0, 0));
+    axes.push_back(cv::Point3d(0, 50, 0));
+    axes.push_back(cv::Point3d(0, 0, 50));
+    std::vector<type_point> projected_axes;
 
     cv::projectPoints(axes, rotation_vector, translation_vector, projection, cv::noArray(), projected_axes);
 std::cerr << __LINE__ << std::endl;
