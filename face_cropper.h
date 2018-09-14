@@ -137,6 +137,7 @@ class face_cropper
     void crop_rotatedrect(cv::Mat &i_img, cv::RotatedRect &rect, cv::Mat &o_img);
     void crop_nth(cv::Mat &i_img, int n, cv::Mat &o_img);
     void dump_metric(int n, std::ostream &os);
+    bool detect_and_output(std::string &read_img_name, std::string &write_img_name, std::ostringstream &oss);
 };
 
 inline type_point toCv(const dlib::point &p)

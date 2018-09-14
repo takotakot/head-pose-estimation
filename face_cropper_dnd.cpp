@@ -92,37 +92,8 @@ int main(int argc, char *argv[])
                         std::cerr << "th" << thread_num << ": " << read_img_name << std::endl;
                     }
                     write_img_name = append_date_suffix(read_img_name, date_suffix);
-                    // std::cerr << write_img_name << std::endl;
 
-                    // code duplicated
-                    img_color = cv::imread(read_img_name);
-                    if (img_color.data == NULL)
-                    {
-                        read_recognize_error = true;
-                        oss << "Not an image or not supported";
-                    }
-                    else
-                    {
-                        dlib::cv_image<dlib::bgr_pixel> cimg(img_color);
-
-                        cropper.detect(cimg);
-
-                        if (0 == cropper.get_num_faces())
-                        {
-                            read_recognize_error = true;
-                            oss << "no face is detected in: " << read_img_name << std::endl;
-                        }
-                        for (int i = 0; i < cropper.get_num_faces(); ++i)
-                        {
-                            // std::cerr << __LINE__ << std::endl;
-                            cropper.crop_nth(img_color, i, o_img);
-                            filename = get_nth_img_name(write_img_name, i);
-                            cv::imwrite(filename.c_str(), o_img);
-                            // std::cerr << "write: " << filename << std::endl;
-                            oss << filename << "\t";
-                            cropper.dump_metric(i, oss);
-                        }
-                    }
+                    read_recognize_error = cropper.detect_and_output(read_img_name, write_img_name, oss);
 #pragma omp critical
                     {
                         if (read_recognize_error) {
@@ -150,32 +121,8 @@ int main(int argc, char *argv[])
 
                     read_img_name = src.name + "/" + src.dir.filelist[i];
                     write_img_name = dest_dirname + src.dir.filelist[i];
-                    // TODO: skip non-image files
-                    img_color = cv::imread(read_img_name);
-                    if(img_color.data == NULL) {
-                        read_recognize_error = true;
-                        oss << "Not an image or not supported";
-                    }else{
-                        dlib::cv_image<dlib::bgr_pixel> cimg(img_color);
 
-                        cropper.detect(cimg);
-
-                        if (0 == cropper.get_num_faces())
-                        {
-                            read_recognize_error = true;
-                            oss << "no face is detected in: " << read_img_name;
-                        }
-                        for (int i = 0; i < cropper.get_num_faces(); ++i)
-                        {
-                            cropper.crop_nth(img_color, i, o_img);
-
-                            filename = get_nth_img_name(write_img_name, i);
-                            cv::imwrite(filename.c_str(), o_img);
-                            // std::cerr << "write: " << filename << std::endl;
-                            oss << filename << "\t";
-                            cropper.dump_metric(i, oss);
-                        }
-                    }
+                    read_recognize_error = cropper.detect_and_output(read_img_name, write_img_name, oss);
 #pragma omp critical
                     {
                         if (read_recognize_error)

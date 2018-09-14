@@ -1,4 +1,6 @@
 #include "face_cropper.h"
+#include "functions.h"
+#include <omp.h>
 
 #define HAVE_ROTATEDRECT_3PT 0
 
@@ -439,4 +441,38 @@ void face_cropper::dump_metric(int n, std::ostream &os)
         angle += 90.0;
     }
     os << "\t" << angle;
+}
+
+bool face_cropper::detect_and_output(std::string &read_img_name, std::string &write_img_name, std::ostringstream &oss)
+{
+    bool read_recognize_error = false;
+    std::string filename;
+    cv::Mat img_color = cv::imread(read_img_name), o_img;
+    if (img_color.data == NULL)
+    {
+        read_recognize_error = true;
+        oss << "Not an image or not supported";
+    }
+    else
+    {
+        dlib::cv_image<dlib::bgr_pixel> cimg(img_color);
+        detect(cimg);
+
+        if (0 == get_num_faces())
+        {
+            read_recognize_error = true;
+            oss << "no face is detected in: " << read_img_name << std::endl;
+        }
+        for (int i = 0; i < get_num_faces(); ++i)
+        {
+            // std::cerr << __LINE__ << std::endl;
+            crop_nth(img_color, i, o_img);
+            filename = get_nth_img_name(write_img_name, i);
+            cv::imwrite(filename.c_str(), o_img);
+            // std::cerr << "write: " << filename << std::endl;
+            oss << filename << "\t";
+            dump_metric(i, oss);
+        }
+    }
+    return read_recognize_error;
 }
