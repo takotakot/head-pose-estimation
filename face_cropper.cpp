@@ -411,6 +411,8 @@ void face_cropper::crop_rotatedrect(cv::Mat &i_img, cv::RotatedRect &rect, cv::M
     // 元画像を回転
     cv::warpAffine(i_img, rotated, rotation_matrix, rotated.size(), cv::INTER_CUBIC);
     // 回転した画像から矩形領域を切り出す
+    // o_img = cv::Mat(i_img.size(), i_img.type());
+    o_img = i_img;
     cv::getRectSubPix(rotated, rect_size, rect.center, o_img);
 }
 
