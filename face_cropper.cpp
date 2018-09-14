@@ -410,7 +410,12 @@ void face_cropper::crop_rotatedrect(cv::Mat &i_img, cv::RotatedRect &rect, cv::M
 
     // 回転矩形の角度から回転行列を計算
     rotation_matrix = cv::getRotationMatrix2D(rect.center, angle, 1.0);
+    // std::cerr << rotation_matrix << std::endl;
     // 元画像を回転
+    /*
+[0.9986816384218227, 0.05133210573416831, -69.29336421762858;
+  -0.05133210573416831, 0.9986816384218227, 67.81152397893035]
+    */
     cv::warpAffine(i_img, rotated, rotation_matrix, rotated.size(), cv::INTER_CUBIC);
     // 回転した画像から矩形領域を切り出す
     // o_img = cv::Mat(i_img.size(), i_img.type());
@@ -442,6 +447,11 @@ void face_cropper::dump_metric(int n, std::ostream &os)
 #else
     rect = RotatedRect_pt(crop_rect[0], crop_rect[1], crop_rect[2]);
 #endif
+/*
+    std::cerr << crop_rect[0] << std::endl;
+    std::cerr << crop_rect[1] << std::endl;
+    std::cerr << crop_rect[2] << std::endl;
+*/
     angle = rect.angle;
     if (angle < -45.)
     {

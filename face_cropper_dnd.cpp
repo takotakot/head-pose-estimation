@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
 // #pragma omp parallel for private(read_img_name, write_img_name, img_color, recog_ok, cropper_obj)
 // private(read_img_name, write_img_name, img_color, recog_ok)
-#pragma omp parallel
+#pragma omp parallel // num_threads(8)
     {
         // cropper cropper_obj;
         face_cropper cropper;
