@@ -17,7 +17,7 @@ cv::RotatedRect RotatedRect_pt(const cv::Point2d &_point1,
   double a = std::min(norm(vecs[0]), norm(vecs[1]));
   // check that given sides are perpendicular
   CV_Assert(std::fabs(vecs[0].ddot(vecs[1])) * a <=
-            FLT_EPSILON * 9 * x * (norm(vecs[0]) * norm(vecs[1])));
+            DBL_EPSILON * 9 * x * (norm(vecs[0]) * norm(vecs[1])));
 
   // wd_i stores which vector (0,1) or (1,2) will make the width
   // One of them will definitely have slope within -1 to 1
