@@ -437,7 +437,7 @@ void face_cropper::dump_metric(int n, std::ostream &os)
     std::vector<type_point> crop_rect = metrics[n].get_crop_rect();
     cv::RotatedRect rect;
 #if HAVE_ROTATEDRECT_3PT
-    rect = RotatedRect(crop_rect[0], crop_rect[1], crop_rect[2]);
+    rect = cv::RotatedRect(crop_rect[0], crop_rect[1], crop_rect[2]);
 #else
     rect = RotatedRect_pt(crop_rect[0], crop_rect[1], crop_rect[2]);
 #endif
