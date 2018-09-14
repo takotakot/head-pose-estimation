@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
     if (argc < 2)
     {
         // nop
+        std::cout << "Give command line arguements or Drag and Drop files or directories." << std::endl;
         return 0;
     }
     else
@@ -47,8 +48,7 @@ int main(int argc, char *argv[])
             sst.add(dir_str);
         }
     }
-
-    sst.dump(std::cerr);
+    
     create_all(date_suffix, sst);
 
     std::string error_file_name = "face_recognition_error" + date_suffix + ".txt";
@@ -69,7 +69,6 @@ int main(int argc, char *argv[])
         // cropper cropper_obj;
         face_cropper cropper;
         // std::stringstream obuf;
-        cv::Mat img_color, o_img;
 
         std::string filename, read_img_name, write_img_name, dest_dirname;
         std::ostringstream oss;
@@ -112,8 +111,6 @@ int main(int argc, char *argv[])
                 for (int i = 0; i < src.dir.filelist.size(); ++i)
                 {
                     oss.str("");
-                    // http://stackoverflow.com/questions/15033827/multiple-threads-writing-to-stdcout-or-stdcerr
-
 #pragma omp critical
                     {
                         std::cerr << "th" << thread_num << ": " << src.dir.filelist[i] << std::endl;
