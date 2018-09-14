@@ -4,6 +4,7 @@
 
 // #define omp_get_thread_num() (0)
 #define HAVE_ROTATEDRECT_3PT 0
+#define OPENCV3 1
 
 cv::RotatedRect RotatedRect_pt(const cv::Point2d &_point1, const cv::Point2d &_point2, const cv::Point2d &_point3)
 {
