@@ -13,14 +13,16 @@ cv::RotatedRect RotatedRect_pt(const cv::Point2d &_point1,
   cv::Vec2d vecs[2];
   vecs[0] = cv::Vec2d(_point1 - _point2);
   vecs[1] = cv::Vec2d(_point2 - _point3);
+  double x = std::max(norm(_point1), std::max(norm(_point2), norm(_point3)));
+  double a = std::min(norm(vecs[0]), norm(vecs[1]));
   // check that given sides are perpendicular
-  CV_Assert(abs(vecs[0].dot(vecs[1])) / (norm(vecs[0]) * norm(vecs[1])) <=
-            FLT_EPSILON);
+  CV_Assert(std::fabs(vecs[0].ddot(vecs[1])) * a <=
+            FLT_EPSILON * 9 * x * (norm(vecs[0]) * norm(vecs[1])));
 
   // wd_i stores which vector (0,1) or (1,2) will make the width
   // One of them will definitely have slope within -1 to 1
   int wd_i = 0;
-  if (std::abs(vecs[1][1]) < std::abs(vecs[1][0])) wd_i = 1;
+  if (std::fabs(vecs[1][1]) < std::fabs(vecs[1][0])) wd_i = 1;
   int ht_i = (wd_i + 1) % 2;
 
   double _angle =
