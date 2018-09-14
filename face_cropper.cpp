@@ -371,8 +371,11 @@ void face_cropper::detect(dlib::cv_image<T> &image)
 
     faces.clear();
     std::cerr << __LINE__ << std::endl;
-    faces = detector(image);
     std::cerr << __LINE__ << std::endl;
+//#pragma omp critical
+    {
+        faces = detector(image);
+    }
 
     shapes.clear();
     metrics.clear();
